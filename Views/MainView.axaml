@@ -1,0 +1,56 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:NewRGB.ViewModels"
+             xmlns:asyncImageLoader="clr-namespace:AsyncImageLoader;assembly=AsyncImageLoader.Avalonia"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="NewRGB.Views.MainView"
+             x:DataType="vm:MainViewModel">
+            
+    <Panel>
+        <Image asyncImageLoader:ImageLoader.Source="https://newrgb.enn3.ovh/background/0" Stretch="Fill"></Image>
+        
+        <Panel Margin="20, 40, 20, 40">
+            <Button VerticalAlignment="Top" Command="{Binding LogoCommand}">
+                <Button.Styles>
+                    <Style Selector="Button">
+                        <Setter Property="Margin" Value="9,3,9,3"/>
+                        <Setter Property="BorderThickness" Value="0"/>
+                        <Setter Property="Background" Value="Transparent"/>
+                        <Setter Property="Padding" Value="6"/>
+                    </Style>
+                    <Style Selector="Button /template/ ContentPresenter">
+                        <Setter Property="CornerRadius" Value="50"/>
+                    </Style>
+                    <Style Selector="Button:pointerover /template/ ContentPresenter">
+                        <Setter Property="Background" Value="Transparent"/>
+                    </Style>
+                </Button.Styles>
+                <Image asyncImageLoader:ImageLoader.Source="https://files.enn3.ovh/RGB.png" Width="60"></Image>
+            </Button>
+            
+            <StackPanel HorizontalAlignment="Right">
+                <StackPanel Orientation="Horizontal">
+                    <Label>NewRGB</Label>
+                    <Label>NewRGB</Label>
+                </StackPanel>
+                <StackPanel HorizontalAlignment="Right">
+                    <Label>SUS</Label>
+                    <Label>NewRGB</Label>
+                </StackPanel>
+            </StackPanel>
+            
+            <Panel VerticalAlignment="Bottom">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Spacing="20">
+                    <Label>NewRGB</Label>
+                    <Label>NewRGB</Label>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="20">
+                    <Label>NewRGB</Label>
+                    <Label>NewRGB</Label>
+                </StackPanel>
+            </Panel>  
+        </Panel>
+    </Panel>
+</UserControl>
