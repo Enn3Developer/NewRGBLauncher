@@ -1,0 +1,37 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:NewRGB.ViewModels"
+             xmlns:asyncImageLoader="clr-namespace:AsyncImageLoader;assembly=AsyncImageLoader.Avalonia"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="NewRGB.Views.LoginView"
+             x:DataType="vm:LoginViewModel">
+    <Panel>
+        <Image asyncImageLoader:ImageLoader.Source="https://newrgb.enn3.ovh/background/0" Stretch="Fill" />
+        <Panel HorizontalAlignment="Center" VerticalAlignment="Center" MinHeight="100" MinWidth="300">
+            <Rectangle Fill="Black" Opacity="80" />
+            <Panel Name="AuthenticationMethod" IsVisible="{Binding VisibleMethod}">
+                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="10" Margin="20">
+                    <Label Foreground="Yellow" FontWeight="DemiBold">Microsoft Authentication not enabled at the moment</Label>
+                    <Button HorizontalAlignment="Center" Command="{Binding OfflineAuth}">
+                        <Label>Offline Authentication</Label>
+                    </Button>
+                    <Button HorizontalAlignment="Center" IsEnabled="False" ToolTip.Tip="Not enabled">
+                        <Label>Microsoft Authentication</Label>
+                    </Button>
+                </StackPanel>
+            </Panel>
+            <Panel Name="OfflineAuthentication" IsVisible="{Binding VisibleOffline}">
+                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="10" Margin="20">
+                    <Label HorizontalAlignment="Left">Display Name</Label>
+                    <TextBox Name="OfflineAuthBox" MinWidth="150" KeyUp="OnEnter" />
+                    <Button Name="OfflineAuthBtn" HorizontalAlignment="Center" Margin="0, 20, 0, 0"
+                            Click="OnOfflineAuthClick">
+                        Login
+                    </Button>
+                </StackPanel>
+            </Panel>
+        </Panel>
+    </Panel>
+</UserControl>

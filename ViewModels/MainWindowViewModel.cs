@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using NewRGB.Data;
-using ProjBobcat.Class.Model.LauncherAccount;
+using ProjBobcat.Class.Model;
 using ProjBobcat.DefaultComponent.Authenticator;
-using ProjBobcat.DefaultComponent.Launch;
 using ReactiveUI;
 
 namespace NewRGB.ViewModels;
@@ -12,32 +9,43 @@ namespace NewRGB.ViewModels;
 public class MainWindowViewModel : ViewModelBase
 {
     private ViewModelBase _contentViewModel;
+
+    public MainWindowViewModel()
+    {
+        Instance = this;
+        DataManager.Instance.InitData(DataManager.Instance.DefaultLauncherAccountParser());
+        if (!DataManager.Instance.HasAccount())
+        {
+            Console.WriteLine("no account");
+            _contentViewModel = new LoginViewModel();
+        }
+        else
+        {
+            _contentViewModel = new MainViewModel();
+        }
+    }
+
+    public static MainWindowViewModel? Instance { get; private set; }
+
     public ViewModelBase ContentViewModel
     {
         get => _contentViewModel;
         private set => this.RaiseAndSetIfChanged(ref _contentViewModel, value);
     }
 
-    public MainWindowViewModel()
+    public void OfflineAuth(string name)
     {
-        DataManager.Instance.InitData(DataManager.Instance.DefaultLauncherAccountParser());
-        if (!DataManager.Instance.HasAccount())
+        Console.WriteLine("Offline auth: {0}", name);
+        if (DataManager.Instance.LauncherAccountParser == null) return;
+        var offlineAuthenticator = new OfflineAuthenticator
         {
-            Console.WriteLine("no account");
-            // var launcherProfileParser = new DefaultLauncherAccountParser(DataManager.Instance.DataPath, Guid.NewGuid());
-            // // if (launcherProfileParser.LauncherAccount?.ActiveAccountLocalId == null)
-            // // {
-            // //     launcherProfileParser.ActivateAccount(launcherProfileParser.LauncherAccount?.Accounts?.Keys.FirstOrDefault());
-            // // }
-            // Console.WriteLine(launcherProfileParser.LauncherAccount?.ActiveAccountLocalId);
-            // Console.WriteLine(string.Join(Environment.NewLine, launcherProfileParser.LauncherAccount?.Accounts ?? new Dictionary<string,AccountModel>()));
-            // var offlineAuthenticator = new OfflineAuthenticator
-            // {
-            //     LauncherAccountParser = launcherProfileParser,
-            //     Username = "Enn3DevPlayer"
-            // };
-            // launcherProfileParser.ActivateAccount(DataManager.Instance.ManageAuth(offlineAuthenticator)?.ToString());
-        }
-        _contentViewModel = new MainViewModel();
+            Username = name,
+            LauncherAccountParser = DataManager.Instance.LauncherAccountParser
+        };
+        var result = offlineAuthenticator.Auth();
+        if (result.AuthStatus is AuthStatus.Failed or AuthStatus.Unknown || result.SelectedProfile == null) return;
+        DataManager.Instance.LauncherAccountParser.ActivateAccount(DataManager.Instance.LauncherAccountParser
+            .Find(result.SelectedProfile.UUID.ToGuid())?.Key ?? "");
+        ContentViewModel = new MainViewModel();
     }
 }
