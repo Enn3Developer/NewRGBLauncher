@@ -54,7 +54,6 @@ public class Technic(string modpackName)
             response.EnsureSuccessStatusCode();
             if (response.Content.Headers.ContentLength == null) throw new Exception("content length is null");
             var length = response.Content.Headers.ContentLength.Value;
-            Console.WriteLine($"length: {length}");
             var stream = await response.Content.ReadAsStreamAsync();
             var buffer = new byte[BufferSize];
             return new DownloadProgress(buffer, fileStream, length, stream);
@@ -87,7 +86,6 @@ public class DownloadProgress(byte[] buffer, FileStream fileStream, long length,
     {
         var bytesRead = (long)await stream.ReadAsync(buffer);
         if (bytesRead == 0) return 0;
-        Console.WriteLine($"downloaded: {bytesRead}");
         await fileStream.WriteAsync(buffer);
         return bytesRead;
     }

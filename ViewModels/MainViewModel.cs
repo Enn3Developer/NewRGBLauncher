@@ -4,6 +4,7 @@ using System.Reactive;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using NewRGB.Data;
+using ProjBobcat.Class.Helper;
 using ReactiveUI;
 
 namespace NewRGB.ViewModels;
@@ -56,7 +57,16 @@ public class MainViewModel : ViewModelBase
             await DownloadUpdate();
             await InstallUpdate();
             await _technic.SaveVersion();
-            return;
+            _needsUpdate = false;
+            UpdateProgress(1.0f, "Ready: Update installed");
+            PlayText = "Play";
+        }
+        else
+        {
+            var javaList = await Task.Run(() => SystemInfoHelper.FindJava());
+            var javaEnumerator = javaList.GetAsyncEnumerator();
+            Console.WriteLine("all javas found: ");
+            while (await javaEnumerator.MoveNextAsync()) Console.WriteLine(javaEnumerator.Current);
         }
     }
 
@@ -113,8 +123,6 @@ public class MainViewModel : ViewModelBase
         {
             UpdateProgress(1.0f, "Ready");
         }
-
-        Console.WriteLine($"needs update: {_needsUpdate}");
     }
 
     private void UpdateProgress(float value, string desc)

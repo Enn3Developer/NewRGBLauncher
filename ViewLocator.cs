@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using Avalonia.Controls;
 using Avalonia.Controls.Templates;
 using NewRGB.ViewModels;
@@ -7,22 +9,26 @@ namespace NewRGB;
 
 public class ViewLocator : IDataTemplate
 {
-    public Control? Build(object? data)
+    private static readonly Dictionary<Type, Func<Control>> Registration = new();
+
+    public static void Register<TViewModel, TView>() where TView : Control, new()
     {
-        if (data is null)
-            return null;
+        Registration.Add(typeof(TViewModel), () => new TView());
+    }
 
-        var name = data.GetType().FullName!.Replace("ViewModel", "View", StringComparison.Ordinal);
-        var type = Type.GetType(name);
+    public static void Register<TViewModel, TView>(Func<TView> factory) where TView : Control
+    {
+        Registration.Add(typeof(TViewModel), factory);
+    }
 
-        if (type != null)
-        {
-            var control = (Control)Activator.CreateInstance(type)!;
-            control.DataContext = data;
-            return control;
-        }
+    public Control Build(object? data)
+    {
+        Debug.Assert(data != null, nameof(data) + " != null");
+        var type = data.GetType();
 
-        return new TextBlock { Text = "Not Found: " + name };
+        return Registration.TryGetValue(type, out var factory)
+            ? factory()
+            : new TextBlock { Text = "Not Found: " + type };
     }
 
     public bool Match(object? data)
