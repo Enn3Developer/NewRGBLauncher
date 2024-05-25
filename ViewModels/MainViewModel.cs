@@ -1,10 +1,8 @@
-using System;
 using System.Diagnostics;
 using System.Reactive;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using NewRGB.Data;
-using ProjBobcat.Class.Helper;
 using ReactiveUI;
 
 namespace NewRGB.ViewModels;
@@ -14,6 +12,7 @@ public class MainViewModel : ViewModelBase
     private float _progressValue = 1.0f;
     private string _progressDesc = "Ready";
     private string _playText = "Play";
+    private bool _determinateValue = true;
     private readonly Technic _technic = new("newrgb");
     private bool _needsUpdate;
 
@@ -50,6 +49,12 @@ public class MainViewModel : ViewModelBase
 
     public ReactiveCommand<Unit, Unit> PlayBtn { get; }
 
+    public bool DeterminateValue
+    {
+        get => _determinateValue;
+        private set => this.RaiseAndSetIfChanged(ref _determinateValue, !value);
+    }
+
     private async Task OnPlayButton()
     {
         if (_needsUpdate)
@@ -63,6 +68,7 @@ public class MainViewModel : ViewModelBase
         }
         else
         {
+            UpdateProgress(0.0f, "Checking Java version", false);
             var javaList = DataManager.FindJava();
             var javaEnumerator = javaList.GetAsyncEnumerator();
             var valid = false;
@@ -80,12 +86,25 @@ public class MainViewModel : ViewModelBase
             }
 
             var javaPath = javaEnumerator.Current;
+            UpdateProgress(0.0f, "Checking Forge installation", false);
+            if (!DataManager.Instance.IsForgeInstalled())
+            {
+                UpdateProgress(0.0f, "Starting Forge download", false);
+                var progress = await DataManager.Instance.DownloadForge();
+                if (progress == null)
+                {
+                    UpdateProgress(1.0f, "Failed to start Forge download. Please retry");
+                    return;
+                }
+
+                await DownloadAndProgress(progress, "Forge");
+            }
         }
     }
 
     private async Task DownloadUpdate()
     {
-        UpdateProgress(0.0f, "Starting update");
+        UpdateProgress(0.0f, "Starting update", false);
         var progress = await _technic.DownloadUpdate();
         if (progress == null)
         {
@@ -93,7 +112,12 @@ public class MainViewModel : ViewModelBase
             return;
         }
 
-        UpdateProgress(0.0f, "Downloading update");
+        await DownloadAndProgress(progress, "update");
+    }
+
+    private async Task DownloadAndProgress(DownloadProgress progress, string desc)
+    {
+        UpdateProgress(0.0f, $"Downloading {desc}");
         var bytes = 0L;
         var stopWatch = new Stopwatch();
         stopWatch.Start();
@@ -102,7 +126,7 @@ public class MainViewModel : ViewModelBase
             bytes += await progress.Progress();
             stopWatch.Stop();
             UpdateProgress((float)bytes / progress.Length,
-                $"Downloading update: {(float)bytes / 1024 / 1024 / ((float)(stopWatch.ElapsedMilliseconds > 0 ? stopWatch.ElapsedMilliseconds : 1) / 1000):F1}MB/s");
+                $"Downloading {desc}: {(float)bytes / 1024 / 1024 / ((float)(stopWatch.ElapsedMilliseconds > 0 ? stopWatch.ElapsedMilliseconds : 1) / 1000):F1}MB/s");
             stopWatch.Start();
         }
 
@@ -126,7 +150,7 @@ public class MainViewModel : ViewModelBase
 
     public async Task AsyncOnLoaded()
     {
-        UpdateProgress(0.0f, "Checking for updates");
+        UpdateProgress(0.0f, "Checking for updates", false);
         await _technic.Init();
         if (await _technic.CheckUpdate())
         {
@@ -140,12 +164,13 @@ public class MainViewModel : ViewModelBase
         }
     }
 
-    private void UpdateProgress(float value, string desc)
+    private void UpdateProgress(float value, string desc, bool determinateValue = true)
     {
         _progressValue = value;
         this.RaisePropertyChanged(nameof(ProgressText));
         this.RaisePropertyChanged(nameof(ProgressValue));
         ProgressDesc = desc;
+        DeterminateValue = determinateValue;
     }
 
     private static void OpenUrl(string url)

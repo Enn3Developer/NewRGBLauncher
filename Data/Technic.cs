@@ -11,7 +11,6 @@ namespace NewRGB.Data;
 
 public class Technic(string modpackName)
 {
-    private const int BufferSize = 4096;
     private readonly HttpClient _httpClient = new();
     private const int BuildVersion = 69420;
     private string _version = "";
@@ -42,24 +41,10 @@ public class Technic(string modpackName)
         await File.WriteAllTextAsync(path, _version);
     }
 
-    public async Task<DownloadProgress?> DownloadUpdate()
+    public Task<DownloadProgress?> DownloadUpdate()
     {
         var path = Path.Combine(DataManager.Instance.DataPath, "modpack.zip");
-        var fileStream = File.OpenWrite(path);
-        try
-        {
-            var response = await _httpClient.GetAsync(_downloadUrl);
-            response.EnsureSuccessStatusCode();
-            if (response.Content.Headers.ContentLength == null) throw new Exception("content length is null");
-            var length = response.Content.Headers.ContentLength.Value;
-            var stream = await response.Content.ReadAsStreamAsync();
-            var buffer = new byte[BufferSize];
-            return new DownloadProgress(buffer, fileStream, length, stream);
-        }
-        catch (HttpRequestException requestException)
-        {
-            return null;
-        }
+        return DownloadProgress.Download(_downloadUrl, path, _httpClient);
     }
 
     public async Task<InstallProgress> InstallUpdate()
@@ -73,25 +58,6 @@ public class Technic(string modpackName)
         var fileList = new List<ZipArchiveEntry>(256);
         fileList.AddRange(archive.Entries);
         return new InstallProgress(fileList, mcDir);
-    }
-}
-
-public class DownloadProgress(byte[] buffer, FileStream fileStream, long length, Stream stream)
-{
-    public long Length { get; } = length;
-
-    public async Task<long> Progress()
-    {
-        var bytesRead = (long)await stream.ReadAsync(buffer);
-        if (bytesRead == 0) return 0;
-        await fileStream.WriteAsync(buffer);
-        return bytesRead;
-    }
-
-    public async Task End()
-    {
-        await fileStream.FlushAsync();
-        fileStream.Close();
     }
 }
 

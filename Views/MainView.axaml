@@ -55,7 +55,7 @@
                     <Rectangle Fill="White" Width="2" />
                     <StackPanel Orientation="Vertical" MinWidth="200">
                         <Label Content="{Binding ProgressText}" />
-                        <ProgressBar Value="{Binding ProgressValue}" />
+                        <ProgressBar Value="{Binding ProgressValue}" IsIndeterminate="{Binding DeterminateValue}" />
                         <Label Content="{Binding ProgressDesc}" FontSize="12" />
                     </StackPanel>
                 </StackPanel>

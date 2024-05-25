@@ -19,12 +19,26 @@ public class DataManager
     public string DataPath { get; } =
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "RGBcraft");
 
+    public string? ForgeInstallerPath { get; private set; }
     public ILauncherAccountParser? LauncherAccountParser { get; private set; }
 
     public void InitData(ILauncherAccountParser launcherAccountParser)
     {
         LauncherAccountParser = launcherAccountParser;
+        ForgeInstallerPath = Path.Combine(DataPath, "forge_installer.jar");
         if (!Directory.Exists(DataPath)) Directory.CreateDirectory(DataPath);
+    }
+
+    public bool IsForgeInstalled()
+    {
+        return File.Exists(ForgeInstallerPath);
+    }
+
+    public Task<DownloadProgress?> DownloadForge()
+    {
+        if (ForgeInstallerPath == null) return new Task<DownloadProgress?>(() => null);
+        return DownloadProgress.Download("https://files.enn3.ovh/forge-1.19.2-43.3.13-installer.jar",
+            ForgeInstallerPath);
     }
 
     public ILauncherAccountParser DefaultLauncherAccountParser()
