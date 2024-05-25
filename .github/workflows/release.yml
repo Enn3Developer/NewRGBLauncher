@@ -11,28 +11,54 @@ jobs:
         target: [ win-x64, linux-x64 ]
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
       - name: Install .NET Core
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
       - name: Setup MSBuild.exe
         uses: microsoft/setup-msbuild@v2
-      - name: Build ${{ matrix.target }}
+      - name: Build
         run: |
-          dotnet publish -c Release -r ${{ matrix.target }} --self-contained -p:PublishTrimmed=True
-          cd bin\Release\net8.0\${{ matrix.target }}\publish
-          rm *.dbg
-          tar -cavf "NewRGB-${{ matrix.target }}.zip" *
+          dotnet publish -r win-x64 --self-contained -p:PublishTrimmed=True
+          cd bin\Release\net8.0\win-x64\publish
+          tar -cavf "NewRGB.zip" *
       - name: Upload
         uses: actions/upload-artifact@v3
         with:
           name: NewRGB.zip
-          path: bin\Release\net8.0\${{ matrix.target }}\publish\NewRGB-${{ matrix.target }}.zip
+          path: bin\Release\net8.0\win-x64\publish\NewRGB.zip
       - name: Publish in release
         uses: softprops/action-gh-release@v1
         if: github.ref_type == 'tag'
         with:
           files: |
-            bin/Release/net8.0/${{ matrix.target }}/publish/NewRGB-${{ matrix.target }}.zip
+            bin/Release/net8.0/win-x64/publish/NewRGB.zip
+          token: ${{ secrets.GITHUB_TOKEN }}
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+      - name: Install .NET Core
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - name: Build
+        run: |
+          dotnet publish -r linux-x64 --self-contained -p:PublishTrimmed=True
+          cd bin/Release/net8.0/linux-x64/publish
+          rm NewRGB.dbg
+          tar -cvf "NewRGB.tar.gz" *
+      - name: Upload
+        uses: actions/upload-artifact@v3
+        with:
+          name: NewRGB.zip
+          path: bin/Release/net8.0/linux-x64/publish/NewRGB.tar.gz
+      - name: Publish in release
+        uses: softprops/action-gh-release@v1
+        if: github.ref_type == 'tag'
+        with:
+          files: |
+            bin/Release/net8.0/linux-x64/publish/NewRGB.tar.gz
           token: ${{ secrets.GITHUB_TOKEN }}
