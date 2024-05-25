@@ -51,6 +51,7 @@ public class DataManager
 
         ForgeInstallerPath = Path.Combine(DataPath, "forge_installer.jar");
         if (!Directory.Exists(DataPath)) Directory.CreateDirectory(DataPath);
+        if (!Directory.Exists(MinecraftPath)) Directory.CreateDirectory(MinecraftPath);
         var versionsDir = Path.Combine(MinecraftPath, "versions");
         var forgeDir = Path.Combine(versionsDir, "1.19.2-forge-43.3.13");
         if (!Directory.Exists(versionsDir)) Directory.CreateDirectory(versionsDir);

@@ -28,6 +28,7 @@ public class MainViewModel : ViewModelBase
     private bool _determinateValue = true;
     private readonly Technic _technic = new("newrgb");
     private bool _needsUpdate;
+    private Process? _gameProcess;
 
     public MainViewModel()
     {
@@ -98,23 +99,37 @@ public class MainViewModel : ViewModelBase
             }
 
             await DownloadAndProgress(progress, "Forge");
-            var forgeInstaller = new HighVersionForgeInstaller
-            {
-                ForgeExecutablePath = DataManager.Instance.ForgeInstallerPath,
-                JavaExecutablePath = javaPath,
-                RootPath = DataManager.Instance.MinecraftPath,
-                VersionLocator = DataManager.Instance.GameCoreBase?.VersionLocator!,
-                DownloadUrlRoot = "https://bmclapi2.bangbang93.com/",
-                MineCraftVersion = "1.19.2",
-                MineCraftVersionId = "1.19.2"
-            };
-            forgeInstaller.StageChangedEventDelegate += (_, args) =>
+            var isLegacy =
+                ForgeInstallerFactory.IsLegacyForgeInstaller(DataManager.Instance.ForgeInstallerPath, "43.3.13");
+            IForgeInstaller forgeInstaller = isLegacy
+                ? new LegacyForgeInstaller
+                {
+                    ForgeExecutablePath = DataManager.Instance.ForgeInstallerPath,
+                    RootPath = DataManager.Instance.MinecraftPath,
+                    ForgeVersion = "43.3.13",
+                    InheritsFrom = "1.19.2"
+                }
+                : new HighVersionForgeInstaller
+                {
+                    ForgeExecutablePath = DataManager.Instance.ForgeInstallerPath,
+                    JavaExecutablePath = javaPath,
+                    RootPath = DataManager.Instance.MinecraftPath,
+                    VersionLocator = DataManager.Instance.GameCoreBase?.VersionLocator!,
+                    DownloadUrlRoot = "https://bmclapi2.bangbang93.com/",
+                    MineCraftVersion = "1.19.2",
+                    MineCraftVersionId = "1.19.2",
+                    InheritsFrom = "1.19.2"
+                };
+            ((InstallerBase)forgeInstaller).StageChangedEventDelegate += (_, args) =>
             {
                 UpdateProgress((float)args.Progress, "Installing Forge");
             };
             await forgeInstaller.InstallForgeTaskAsync();
             UpdateProgress(1.0f, "Installing Forge");
         }
+
+        UpdateProgress(0.0f, "Checking Forge installation", false);
+        await CompleteMinecraft("1.19.2-forge-43.3.13");
     }
 
     private async Task CheckMinecraft()
@@ -124,6 +139,7 @@ public class MainViewModel : ViewModelBase
         var versionsPath = Path.Combine(DataManager.Instance.MinecraftPath, "versions");
         var versionDir = Path.Combine(versionsPath, "1.19.2");
         var versionFile = Path.Combine(versionDir, "1.19.2.json");
+        if (!Directory.Exists(versionsPath)) Directory.CreateDirectory(versionsPath);
         if (!Directory.Exists(versionDir)) Directory.CreateDirectory(versionDir);
         if (!File.Exists(versionFile))
         {
@@ -133,13 +149,19 @@ public class MainViewModel : ViewModelBase
             await File.WriteAllTextAsync(versionFile, await responseVersion.Content.ReadAsStringAsync());
         }
 
+        await CompleteMinecraft("1.19.2");
+    }
+
+    private async Task CompleteMinecraft(string gameId)
+    {
+        var httpClient = new HttpClient();
         var response =
             await httpClient.GetAsync("https://launchermeta.mojang.com/mc/game/version_manifest.json");
         response.EnsureSuccessStatusCode();
         var responseJson = await response.Content.ReadAsStringAsync();
         var versionManifest =
             JsonSerializer.Deserialize(responseJson, VersionManifestContext.Default.VersionManifest);
-        var versionInfo = DataManager.Instance.GameCoreBase?.VersionLocator.GetGame("1.19.2-forge-43.3.13");
+        var versionInfo = DataManager.Instance.GameCoreBase?.VersionLocator.GetGame(gameId);
         if (versionInfo == null)
         {
             UpdateProgress(1.0f, "Can't get info about the game version");
@@ -240,7 +262,14 @@ public class MainViewModel : ViewModelBase
         //             MaxMemory = specificMaxMemory // Maximum Memory
         //         };
 
-        await DataManager.Instance.GameCoreBase?.LaunchTaskAsync(launchSettings)!;
+        var result = await DataManager.Instance.GameCoreBase?.LaunchTaskAsync(launchSettings)!;
+        Console.WriteLine(result.GameProcess?.HasExited);
+        _gameProcess = result.GameProcess;
+        if (result.Error == null) return;
+        Console.WriteLine(result.Error.Error);
+        Console.WriteLine(result.Error.ErrorMessage);
+        Console.WriteLine(result.Error.Exception);
+        Console.WriteLine(result.Error.Cause);
     }
 
     private async Task OnPlayButton()
@@ -263,14 +292,15 @@ public class MainViewModel : ViewModelBase
                 return;
             }
 
-            await CheckForge(javaPath);
-            await Task.Delay(1000);
             await CheckMinecraft();
+            await Task.Delay(1000);
+            await CheckForge(javaPath);
             UpdateProgress(1.0f, "Done");
             await Task.Delay(1000);
             UpdateProgress(1.0f, "Launching RGBcraft", false);
             await Task.Delay(1000);
             await Launch(javaPath);
+            UpdateProgress(1.0f, "Ready");
         }
     }
 
@@ -324,9 +354,10 @@ public class MainViewModel : ViewModelBase
     {
         UpdateProgress(0.0f, "Checking for updates", false);
         await _technic.Init();
-        if (await _technic.CheckUpdate())
+        _needsUpdate = await _technic.CheckUpdate();
+        await Task.Delay(1000);
+        if (_needsUpdate)
         {
-            _needsUpdate = true;
             PlayText = "Update";
             UpdateProgress(1.0f, "Update available");
         }
