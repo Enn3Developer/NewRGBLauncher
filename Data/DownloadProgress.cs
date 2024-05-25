@@ -25,7 +25,7 @@ public class DownloadProgress(byte[] buffer, FileStream fileStream, long length,
             var buffer = new byte[BufferSize];
             return new DownloadProgress(buffer, fileStream, length, stream);
         }
-        catch (HttpRequestException requestException)
+        catch (HttpRequestException)
         {
             return null;
         }
@@ -43,5 +43,6 @@ public class DownloadProgress(byte[] buffer, FileStream fileStream, long length,
     {
         await fileStream.FlushAsync();
         fileStream.Close();
+        await fileStream.DisposeAsync();
     }
 }

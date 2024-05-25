@@ -1,14 +1,12 @@
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Runtime.InteropServices;
 using System.Threading.Tasks;
-using ProjBobcat;
-using ProjBobcat.Class.Helper;
+using ProjBobcat.Class.Model.LauncherProfile;
 using ProjBobcat.DefaultComponent.Launch;
 using ProjBobcat.DefaultComponent.Launch.GameCore;
 using ProjBobcat.DefaultComponent.Logging;
+using ProjBobcat.Exceptions;
 using ProjBobcat.Interface;
 
 namespace NewRGB.Data;
@@ -20,17 +18,37 @@ public class DataManager
     public string DataPath { get; } =
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "RGBcraft");
 
-    public string MinecraftPath { get; private set; } = "";
+    public string MinecraftPath { get; } =
+        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "RGBcraft",
+            ".minecraft");
 
     public string ForgeInstallerPath { get; private set; } = "";
     public ILauncherAccountParser? LauncherAccountParser { get; private set; }
+    public ILauncherProfileParser? LauncherProfileParser { get; private set; }
 
     public GameCoreBase? GameCoreBase { get; private set; }
 
-    public void InitData(ILauncherAccountParser launcherAccountParser)
+    public void InitData(ILauncherAccountParser launcherAccountParser, ILauncherProfileParser launcherProfileParser)
     {
         LauncherAccountParser = launcherAccountParser;
-        MinecraftPath = Path.Combine(DataPath, ".minecraft");
+        LauncherProfileParser = launcherProfileParser;
+        try
+        {
+            LauncherProfileParser.GetGameProfile("RGBcraft");
+        }
+        catch (UnknownGameNameException)
+        {
+            LauncherProfileParser.AddNewGameProfile(new GameProfileModel
+            {
+                Name = "RGBcraft",
+                Resolution = new ResolutionModel
+                {
+                    Height = 600,
+                    Width = 800
+                }
+            });
+        }
+
         ForgeInstallerPath = Path.Combine(DataPath, "forge_installer.jar");
         if (!Directory.Exists(DataPath)) Directory.CreateDirectory(DataPath);
         var versionsDir = Path.Combine(MinecraftPath, "versions");
@@ -41,10 +59,11 @@ public class DataManager
         GameCoreBase = new DefaultGameCore
         {
             ClientToken = clientToken,
-            RootPath = DataPath,
+            RootPath = MinecraftPath,
             VersionLocator = new DefaultVersionLocator(MinecraftPath, clientToken)
             {
-                LauncherAccountParser = LauncherAccountParser
+                LauncherAccountParser = LauncherAccountParser,
+                LauncherProfileParser = LauncherProfileParser
             },
             GameLogResolver = new DefaultGameLogResolver()
         };
@@ -63,7 +82,12 @@ public class DataManager
 
     public ILauncherAccountParser DefaultLauncherAccountParser()
     {
-        return new DefaultLauncherAccountParser(DataPath, Guid.Empty);
+        return new DefaultLauncherAccountParser(MinecraftPath, Guid.Empty);
+    }
+
+    public ILauncherProfileParser DefaultLauncherProfileParser()
+    {
+        return new DefaultLauncherProfileParser(MinecraftPath, Guid.Empty);
     }
 
     public bool HasAccount()

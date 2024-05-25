@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net;
 using NewRGB.Data;
 using ProjBobcat.Class.Model;
 using ProjBobcat.DefaultComponent.Authenticator;
@@ -13,16 +14,13 @@ public class MainWindowViewModel : ViewModelBase
     public MainWindowViewModel()
     {
         Instance = this;
-        DataManager.Instance.InitData(DataManager.Instance.DefaultLauncherAccountParser());
+        ServicePointManager.DefaultConnectionLimit = 512;
+        DataManager.Instance.InitData(DataManager.Instance.DefaultLauncherAccountParser(),
+            DataManager.Instance.DefaultLauncherProfileParser());
         if (!DataManager.Instance.HasAccount())
-        {
-            Console.WriteLine("no account");
             _contentViewModel = new LoginViewModel();
-        }
         else
-        {
             _contentViewModel = new MainViewModel();
-        }
     }
 
     public static MainWindowViewModel? Instance { get; private set; }
@@ -35,7 +33,6 @@ public class MainWindowViewModel : ViewModelBase
 
     public void OfflineAuth(string name)
     {
-        Console.WriteLine("Offline auth: {0}", name);
         if (DataManager.Instance.LauncherAccountParser == null) return;
         var offlineAuthenticator = new OfflineAuthenticator
         {
