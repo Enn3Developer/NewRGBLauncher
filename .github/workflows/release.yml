@@ -4,7 +4,7 @@ on:
     types: [published]
   workflow_dispatch: 
 jobs: 
-  build:
+  build-windows:
     runs-on: windows-latest
     steps:
       - name: Check out repository code
@@ -17,9 +17,7 @@ jobs:
         uses: microsoft/setup-msbuild@v2
       - name: Build
         run: |
-          dotnet publish -r win-x64 --self-contained -p:PublishTrimmed=True
-          cd bin\Release\net8.0\win-x64\publish
-          tar -cavf "NewRGB.zip" *
+          dotnet publish -r win-x64 --self-contained -p:PublishTrimmed=True && cd bin\Release\net8.0\win-x64\publish && tar -cavf "NewRGB.zip" *.exe *.dll
       - name: Upload
         uses: actions/upload-artifact@v3
         with:
