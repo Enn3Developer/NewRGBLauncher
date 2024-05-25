@@ -5,7 +5,6 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
-using Newtonsoft.Json;
 using ProjBobcat;
 using ProjBobcat.Class.Helper;
 using ProjBobcat.DefaultComponent.Launch;
@@ -31,22 +30,6 @@ public class DataManager
     public ILauncherAccountParser DefaultLauncherAccountParser()
     {
         return new DefaultLauncherAccountParser(DataPath, Guid.Empty);
-    }
-
-    private T? Init<T>(string path)
-    {
-        path = Path.Combine(DataPath, path);
-        return File.Exists(path) ? JsonConvert.DeserializeObject<T>(File.ReadAllText(path)) : default;
-    }
-
-    public void SaveAll()
-    {
-    }
-
-    private void Save<T>(T? field, string path)
-    {
-        path = Path.Combine(DataPath, path);
-        if (field != null) File.WriteAllText(path, JsonConvert.SerializeObject(field));
     }
 
     public bool HasAccount()

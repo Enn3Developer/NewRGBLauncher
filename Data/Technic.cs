@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Net.Http;
+using System.Text.Json.Nodes;
 using System.Threading.Tasks;
-using Newtonsoft.Json.Linq;
 using Path = System.IO.Path;
 
 namespace NewRGB.Data;
@@ -23,9 +23,9 @@ public class Technic(string modpackName)
             await _httpClient.GetAsync($"https://api.technicpack.net/modpack/{modpackName}?build={BuildVersion}");
         response.EnsureSuccessStatusCode();
         var responseBody = await response.Content.ReadAsStringAsync();
-        dynamic json = JObject.Parse(responseBody);
-        _version = json.version;
-        _downloadUrl = json.url;
+        var json = JsonNode.Parse(responseBody) ?? throw new Exception("can't parse json");
+        _version = json["version"]!.GetValue<string>();
+        _downloadUrl = json["url"]!.GetValue<string>();
     }
 
     public async Task<bool> CheckUpdate()
@@ -49,8 +49,6 @@ public class Technic(string modpackName)
         try
         {
             var response = await _httpClient.GetAsync(_downloadUrl);
-
-
             response.EnsureSuccessStatusCode();
             if (response.Content.Headers.ContentLength == null) throw new Exception("content length is null");
             var length = response.Content.Headers.ContentLength.Value;
