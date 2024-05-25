@@ -17,7 +17,13 @@ jobs:
         uses: microsoft/setup-msbuild@v2
       - name: Build
         run: |
-          dotnet publish -r win-x64 --self-contained -p:PublishTrimmed=True && cd bin\Release\net8.0\win-x64\publish && tar -cavf "NewRGB.zip" *.exe *.dll
+          dotnet publish -r win-x64 --self-contained -p:PublishTrimmed=True
+      - name: Archive Release
+        uses: thedoctor0/zip-release@0.7.5
+        with:
+          type: 'zip'
+          filename: 'NewRGB.zip'
+          directory: 'bin\Release\net8.0\win-x64\publish'
       - name: Upload
         uses: actions/upload-artifact@v3
         with:
@@ -42,9 +48,13 @@ jobs:
       - name: Build
         run: |
           dotnet publish -r linux-x64 --self-contained -p:PublishTrimmed=True
-          cd bin/Release/net8.0/linux-x64/publish
-          rm NewRGB.dbg
-          tar -cvf "NewRGB.tar.gz" *
+      - name: Archive Release
+        uses: thedoctor0/zip-release@0.7.5
+        with:
+          type: 'tar'
+          filename: 'NewRGB.tar.gz'
+          directory: 'bin/Release/net8.0/linux-x64/publish'
+          exclusions: '*.dbg'
       - name: Upload
         uses: actions/upload-artifact@v3
         with:
