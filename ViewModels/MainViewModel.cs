@@ -63,10 +63,23 @@ public class MainViewModel : ViewModelBase
         }
         else
         {
-            var javaList = await Task.Run(() => SystemInfoHelper.FindJava());
+            var javaList = DataManager.FindJava();
             var javaEnumerator = javaList.GetAsyncEnumerator();
-            Console.WriteLine("all javas found: ");
-            while (await javaEnumerator.MoveNextAsync()) Console.WriteLine(javaEnumerator.Current);
+            var valid = false;
+            while (await javaEnumerator.MoveNextAsync())
+            {
+                if (!await DataManager.IsValidJava(javaEnumerator.Current)) continue;
+                valid = true;
+                break;
+            }
+
+            if (!valid)
+            {
+                UpdateProgress(1.0f, "No valid java installation found");
+                return;
+            }
+
+            var javaPath = javaEnumerator.Current;
         }
     }
 
@@ -105,6 +118,8 @@ public class MainViewModel : ViewModelBase
             await progress.Progress(i);
             UpdateProgress((float)i / progress.Length, "Installing update");
         }
+
+        progress.End();
 
         UpdateProgress(1.0f, "Installing update");
     }

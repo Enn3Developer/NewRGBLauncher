@@ -53,10 +53,10 @@
                         <Label Content="{Binding PlayText}" FontSize="20" />
                     </Button>
                     <Rectangle Fill="White" Width="2" />
-                    <StackPanel Orientation="Vertical">
+                    <StackPanel Orientation="Vertical" MinWidth="200">
                         <Label Content="{Binding ProgressText}" />
                         <ProgressBar Value="{Binding ProgressValue}" />
-                        <Label Content="{Binding ProgressDesc}" />
+                        <Label Content="{Binding ProgressDesc}" FontSize="12" />
                     </StackPanel>
                 </StackPanel>
             </Panel>

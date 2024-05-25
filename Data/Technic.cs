@@ -109,4 +109,11 @@ public class InstallProgress(List<ZipArchiveEntry> fileList, string mcDir)
         if (path.EndsWith(Path.DirectorySeparatorChar)) Directory.CreateDirectory(path);
         else await Task.Run(() => file.ExtractToFile(path));
     }
+
+    public void End()
+    {
+        var zipPath = Path.Combine(DataManager.Instance.DataPath, "modpack.zip");
+        fileList.Clear();
+        File.Delete(zipPath);
+    }
 }
