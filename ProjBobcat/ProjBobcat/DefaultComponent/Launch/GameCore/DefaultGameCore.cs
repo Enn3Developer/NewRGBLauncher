@@ -360,10 +360,10 @@ public sealed class DefaultGameCore : GameCoreBase
                     {
                         if (launchWrapper.Process == null) break;
                         
-                        if (OperatingSystem.IsWindows() && OperatingSystem.IsWindowsVersionAtLeast(5))
-                            _ = Windows.Win32.PInvoke.SetWindowText(
-                                new Windows.Win32.Foundation.HWND(launchWrapper.Process.MainWindowHandle),
-                                settings.WindowTitle);
+                        // if (OperatingSystem.IsWindows() && OperatingSystem.IsWindowsVersionAtLeast(5))
+                        //     _ = Windows.Win32.PInvoke.SetWindowText(
+                        //         new Windows.Win32.Foundation.HWND(launchWrapper.Process.MainWindowHandle),
+                        //         settings.WindowTitle);
 
                     } while (string.IsNullOrEmpty(launchWrapper.Process?.MainWindowTitle));
                 });

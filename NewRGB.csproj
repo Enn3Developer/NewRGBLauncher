@@ -7,7 +7,9 @@
         <ApplicationManifest>app.manifest</ApplicationManifest>
         <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
         <PublishAot>true</PublishAot>
+        <JsonSerializerIsReflectionEnabledByDefault>false</JsonSerializerIsReflectionEnabledByDefault>
         <TrimMode>link</TrimMode>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
 
     <ItemGroup>
@@ -24,6 +26,22 @@
         <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
         <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.0.10"/>
         <PackageReference Include="Avalonia.ReactiveUI" Version="11.0.10"/>
-        <PackageReference Include="ProjBobcat" Version="1.40.0"/>
+        <PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0"/>
+        <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="8.0.0"/>
+        <PackageReference Include="Microsoft.Extensions.ObjectPool" Version="8.0.4"/>
+        <PackageReference Include="Microsoft.Win32.Registry" Version="5.0.0"/>
+        <PackageReference Include="Microsoft.Windows.CsWin32" Version="0.3.49-beta">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="SharpCompress" Version="0.36.0"/>
+        <PackageReference Include="System.Diagnostics.PerformanceCounter" Version="8.0.0"/>
+        <PackageReference Include="System.Management" Version="8.0.0"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Reference Include="System.Diagnostics.PerformanceCounter">
+            <HintPath>..\..\..\.nuget\packages\system.diagnostics.performancecounter\8.0.0\lib\net8.0\System.Diagnostics.PerformanceCounter.dll</HintPath>
+        </Reference>
     </ItemGroup>
 </Project>

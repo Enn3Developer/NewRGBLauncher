@@ -4,9 +4,6 @@ using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
-using Windows.Win32;
-using Windows.Win32.Foundation;
-using Windows.Win32.System.SystemInformation;
 using Microsoft.Win32;
 using ProjBobcat.Class.Model;
 
@@ -28,7 +25,9 @@ public static class SystemInfoHelper
             MemUsagePercentageCounter.NextValue();
             CpuCounter.NextValue();
         }
-        catch (Exception) { }
+        catch (Exception)
+        {
+        }
     }
 
     /// <summary>
@@ -279,33 +278,34 @@ public static class SystemInfoHelper
     /// <param name="proc"></param>
     /// <returns>待检查的进程，如果不传则检测当前进程</returns>
     [SupportedOSPlatform("windows10.0.10586")]
-    public static unsafe bool IsRunningUnderTranslation(Process? proc = null)
+    public static bool IsRunningUnderTranslation(Process? proc = null)
     {
-        if (GetWindowsMajorVersion() == "7") return false;
-
-        proc ??= Process.GetCurrentProcess();
-
-        var handle = proc.Handle;
-
-        IMAGE_FILE_MACHINE processMachine;
-        IMAGE_FILE_MACHINE nativeMachine;
-
-        var result = PInvoke.IsWow64Process2(
-            new HANDLE(handle),
-            &processMachine,
-            &nativeMachine);
-
-        if (!result) return false;
-
-        var nativeArch = nativeMachine switch
-        {
-            IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_AMD64 => Architecture.X64,
-            IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_ARM64 => Architecture.Arm64,
-            IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_ARMNT => Architecture.Arm64,
-            IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_I386 => Architecture.X86,
-            _ => throw new ArgumentException($"Unknown System Arch [{nativeMachine}]")
-        };
-
-        return nativeArch != RuntimeInformation.OSArchitecture;
+        return false;
+        // if (GetWindowsMajorVersion() == "7") return false;
+        //
+        // proc ??= Process.GetCurrentProcess();
+        //
+        // var handle = proc.Handle;
+        //
+        // IMAGE_FILE_MACHINE processMachine;
+        // IMAGE_FILE_MACHINE nativeMachine;
+        //
+        // var result = PInvoke.IsWow64Process2(
+        //     new HANDLE(handle),
+        //     &processMachine,
+        //     &nativeMachine);
+        //
+        // if (!result) return false;
+        //
+        // var nativeArch = nativeMachine switch
+        // {
+        //     IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_AMD64 => Architecture.X64,
+        //     IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_ARM64 => Architecture.Arm64,
+        //     IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_ARMNT => Architecture.Arm64,
+        //     IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_I386 => Architecture.X86,
+        //     _ => throw new ArgumentException($"Unknown System Arch [{nativeMachine}]")
+        // };
+        //
+        // return nativeArch != RuntimeInformation.OSArchitecture;
     }
 }

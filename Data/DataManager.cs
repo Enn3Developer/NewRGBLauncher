@@ -4,10 +4,11 @@ using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Configuration;
 using ProjBobcat;
 using ProjBobcat.Class.Helper;
 using ProjBobcat.DefaultComponent.Launch;
+using ProjBobcat.DefaultComponent.Launch.GameCore;
+using ProjBobcat.DefaultComponent.Logging;
 using ProjBobcat.Interface;
 
 namespace NewRGB.Data;
@@ -19,14 +20,34 @@ public class DataManager
     public string DataPath { get; } =
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "RGBcraft");
 
-    public string? ForgeInstallerPath { get; private set; }
+    public string MinecraftPath { get; private set; } = "";
+
+    public string ForgeInstallerPath { get; private set; } = "";
     public ILauncherAccountParser? LauncherAccountParser { get; private set; }
+
+    public GameCoreBase? GameCoreBase { get; private set; }
 
     public void InitData(ILauncherAccountParser launcherAccountParser)
     {
         LauncherAccountParser = launcherAccountParser;
+        MinecraftPath = Path.Combine(DataPath, ".minecraft");
         ForgeInstallerPath = Path.Combine(DataPath, "forge_installer.jar");
         if (!Directory.Exists(DataPath)) Directory.CreateDirectory(DataPath);
+        var versionsDir = Path.Combine(MinecraftPath, "versions");
+        var forgeDir = Path.Combine(versionsDir, "1.19.2-forge-43.3.13");
+        if (!Directory.Exists(versionsDir)) Directory.CreateDirectory(versionsDir);
+        if (!Directory.Exists(forgeDir)) Directory.CreateDirectory(forgeDir);
+        var clientToken = Guid.Empty;
+        GameCoreBase = new DefaultGameCore
+        {
+            ClientToken = clientToken,
+            RootPath = DataPath,
+            VersionLocator = new DefaultVersionLocator(MinecraftPath, clientToken)
+            {
+                LauncherAccountParser = LauncherAccountParser
+            },
+            GameLogResolver = new DefaultGameLogResolver()
+        };
     }
 
     public bool IsForgeInstalled()
@@ -36,7 +57,6 @@ public class DataManager
 
     public Task<DownloadProgress?> DownloadForge()
     {
-        if (ForgeInstallerPath == null) return new Task<DownloadProgress?>(() => null);
         return DownloadProgress.Download("https://files.enn3.ovh/forge-1.19.2-43.3.13-installer.jar",
             ForgeInstallerPath);
     }
@@ -49,49 +69,6 @@ public class DataManager
     public bool HasAccount()
     {
         return LauncherAccountParser is { LauncherAccount.ActiveAccountLocalId: not null };
-    }
-
-    public static async IAsyncEnumerable<string> FindJava(bool fullSearch = false)
-    {
-        var result = new HashSet<string>();
-
-        if (fullSearch)
-            await foreach (var path in DeepJavaSearcher.DeepSearch())
-                result.Add(path);
-
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            foreach (var path in JavaFinderWindows.FindJavaWindows())
-                result.Add(path);
-        else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-            foreach (var path in JavaFinderMacOS.FindJavaMacOS())
-                result.Add(path);
-        else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-            foreach (var path in JavaFinderLinux.FindJavaLinux())
-                result.Add(path);
-
-        foreach (var path in result)
-            yield return path;
-
-        var evJava = FindJavaUsingEnvironmentVariable();
-
-        if (!string.IsNullOrEmpty(evJava))
-            yield return Path.Combine(evJava, Constants.JavaExecutablePath);
-    }
-
-    private static string? FindJavaUsingEnvironmentVariable()
-    {
-        try
-        {
-            var configuration = new ConfigurationBuilder()
-                .AddEnvironmentVariables()
-                .Build();
-            var javaHome = configuration["JAVA_HOME"];
-            return javaHome;
-        }
-        catch (Exception)
-        {
-            return null;
-        }
     }
 
     public static async Task<bool> IsValidJava(string javaPath)

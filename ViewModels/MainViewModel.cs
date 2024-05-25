@@ -1,8 +1,18 @@
+using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
+using System.Net.Http;
 using System.Reactive;
 using System.Runtime.InteropServices;
+using System.Text.Json;
 using System.Threading.Tasks;
 using NewRGB.Data;
+using ProjBobcat.Class.Model.Mojang;
+using ProjBobcat.DefaultComponent;
+using ProjBobcat.DefaultComponent.Installer.ForgeInstaller;
+using ProjBobcat.DefaultComponent.ResourceInfoResolver;
+using ProjBobcat.Interface;
 using ReactiveUI;
 
 namespace NewRGB.ViewModels;
@@ -69,7 +79,7 @@ public class MainViewModel : ViewModelBase
         else
         {
             UpdateProgress(0.0f, "Checking Java version", false);
-            var javaList = DataManager.FindJava();
+            var javaList = ProjBobcat.Class.Helper.SystemInfoHelper.FindJava();
             var javaEnumerator = javaList.GetAsyncEnumerator();
             var valid = false;
             while (await javaEnumerator.MoveNextAsync())
@@ -98,7 +108,94 @@ public class MainViewModel : ViewModelBase
                 }
 
                 await DownloadAndProgress(progress, "Forge");
+                var forgeInstaller = new HighVersionForgeInstaller
+                {
+                    ForgeExecutablePath = DataManager.Instance.ForgeInstallerPath,
+                    JavaExecutablePath = javaPath,
+                    RootPath = DataManager.Instance.MinecraftPath,
+                    VersionLocator = DataManager.Instance.GameCoreBase?.VersionLocator!,
+                    DownloadUrlRoot = "https://bmclapi2.bangbang93.com/",
+                    MineCraftVersion = "1.19.2",
+                    MineCraftVersionId = "1.19.2"
+                };
+                forgeInstaller.StageChangedEventDelegate += (_, args) =>
+                {
+                    UpdateProgress((float)args.Progress, "Installing Forge");
+                };
+                await forgeInstaller.InstallForgeTaskAsync();
+                UpdateProgress(1.0f, "Installing Forge");
             }
+
+            UpdateProgress(0.0f, "Checking Minecraft. This may take a while", false);
+            var httpClient = new HttpClient();
+            var versionsPath = Path.Combine(DataManager.Instance.MinecraftPath, "versions");
+            var versionDir = Path.Combine(versionsPath, "1.19.2");
+            var versionFile = Path.Combine(versionDir, "1.19.2.json");
+            if (!Directory.Exists(versionDir)) Directory.CreateDirectory(versionDir);
+            if (!File.Exists(versionFile))
+            {
+                var responseVersion = await httpClient.GetAsync(
+                    "https://piston-meta.mojang.com/v1/packages/ed548106acf3ac7e8205a6ee8fd2710facfa164f/1.19.2.json");
+                responseVersion.EnsureSuccessStatusCode();
+                await File.WriteAllTextAsync(versionFile, await responseVersion.Content.ReadAsStringAsync());
+            }
+
+            var response =
+                await httpClient.GetAsync("https://launchermeta.mojang.com/mc/game/version_manifest.json");
+            response.EnsureSuccessStatusCode();
+            var responseJson = await response.Content.ReadAsStringAsync();
+            var versionManifest =
+                JsonSerializer.Deserialize(responseJson, VersionManifestContext.Default.VersionManifest);
+            var versionInfo = DataManager.Instance.GameCoreBase?.VersionLocator.GetGame("1.19.2-forge-43.3.13");
+            if (versionInfo == null)
+            {
+                UpdateProgress(1.0f, "Can't get info about the game version");
+                return;
+            }
+
+            var completer = new DefaultResourceCompleter
+            {
+                MaxDegreeOfParallelism = Environment.ProcessorCount * 2,
+                ResourceInfoResolvers = new List<IResourceInfoResolver>
+                {
+                    new AssetInfoResolver
+                    {
+                        AssetIndexUriRoot = "https://launchermeta.mojang.com/",
+                        AssetUriRoot = "https://resources.download.minecraft.net/",
+                        BasePath = DataManager.Instance.MinecraftPath,
+                        VersionInfo = versionInfo,
+                        CheckLocalFiles = true,
+                        Versions = versionManifest?.Versions!
+                    },
+                    new GameLoggingInfoResolver
+                    {
+                        BasePath = DataManager.Instance.MinecraftPath,
+                        VersionInfo = versionInfo,
+                        CheckLocalFiles = true
+                    },
+                    new LibraryInfoResolver
+                    {
+                        BasePath = DataManager.Instance.MinecraftPath,
+                        ForgeUriRoot = "https://files.minecraftforge.net/maven/",
+                        ForgeMavenUriRoot = "https://maven.minecraftforge.net/",
+                        ForgeMavenOldUriRoot = "https://files.minecraftforge.net/maven/",
+                        FabricMavenUriRoot = "https://maven.fabricmc.net/",
+                        LibraryUriRoot = "https://libraries.minecraft.net/",
+                        VersionInfo = versionInfo,
+                        CheckLocalFiles = true
+                    },
+                    new VersionInfoResolver
+                    {
+                        BasePath = DataManager.Instance.MinecraftPath,
+                        VersionInfo = versionInfo,
+                        CheckLocalFiles = true
+                    }
+                },
+                TotalRetry = 3,
+                CheckFile = true
+            };
+            await completer.CheckAndDownloadTaskAsync();
+            UpdateProgress(1.0f, "Done");
         }
     }
 
