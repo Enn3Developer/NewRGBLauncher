@@ -22,19 +22,20 @@ jobs:
         uses: thedoctor0/zip-release@0.7.5
         with:
           type: 'zip'
-          filename: 'NewRGB.zip'
+          filename: 'NewRGB-Win.zip'
           directory: 'bin\Release\net8.0\win-x64\publish'
+          exclusions: '*.pdb'
       - name: Upload
         uses: actions/upload-artifact@v3
         with:
           name: NewRGB.zip
-          path: bin\Release\net8.0\win-x64\publish\NewRGB.zip
+          path: bin\Release\net8.0\win-x64\publish\NewRGB-Win.zip
       - name: Publish in release
         uses: softprops/action-gh-release@v1
         if: github.ref_type == 'tag'
         with:
           files: |
-            bin/Release/net8.0/win-x64/publish/NewRGB.zip
+            bin/Release/net8.0/win-x64/publish/NewRGB-Win.zip
           token: ${{ secrets.GITHUB_TOKEN }}
   build-linux:
     runs-on: ubuntu-latest
@@ -51,19 +52,19 @@ jobs:
       - name: Archive Release
         uses: thedoctor0/zip-release@0.7.5
         with:
-          type: 'tar'
-          filename: 'NewRGB.tar.gz'
+          type: '7z'
+          filename: 'NewRGB-Linux.7z'
           directory: 'bin/Release/net8.0/linux-x64/publish'
           exclusions: '*.dbg'
       - name: Upload
         uses: actions/upload-artifact@v3
         with:
           name: NewRGB.zip
-          path: bin/Release/net8.0/linux-x64/publish/NewRGB.tar.gz
+          path: bin/Release/net8.0/linux-x64/publish/NewRGB-Linux.7z
       - name: Publish in release
         uses: softprops/action-gh-release@v1
         if: github.ref_type == 'tag'
         with:
           files: |
-            bin/Release/net8.0/linux-x64/publish/NewRGB.tar.gz
+            bin/Release/net8.0/linux-x64/publish/NewRGB-Linux.7z
           token: ${{ secrets.GITHUB_TOKEN }}
