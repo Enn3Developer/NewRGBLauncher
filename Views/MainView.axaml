@@ -3,17 +3,16 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:NewRGB.ViewModels"
-             xmlns:asyncImageLoader="clr-namespace:AsyncImageLoader;assembly=AsyncImageLoader.Avalonia"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="NewRGB.Views.MainView"
              x:DataType="vm:MainViewModel"
              Loaded="OnLoaded">
 
     <Panel>
-        <Image asyncImageLoader:ImageLoader.Source="https://newrgb.enn3.ovh/background/0" Stretch="Fill" />
+        <Image Source="/Assets/0.png" Stretch="Fill" />
 
         <Panel Margin="20, 40, 20, 40">
-            <Button VerticalAlignment="Top" Command="{Binding LogoCommand}">
+            <Button VerticalAlignment="Top" Command="{CompiledBinding LogoCommand}">
                 <Button.Styles>
                     <Style Selector="Button">
                         <Setter Property="Margin" Value="9,3,9,3" />
@@ -28,29 +27,29 @@
                         <Setter Property="Background" Value="Transparent" />
                     </Style>
                 </Button.Styles>
-                <Image asyncImageLoader:ImageLoader.Source="https://files.enn3.ovh/RGB.png" Width="60" />
+                <Image Source="/Assets/RGB.png" Width="60" />
             </Button>
 
             <StackPanel HorizontalAlignment="Right">
                 <StackPanel Orientation="Horizontal">
-                    <Label Content="{Binding Username}" />
-                    <Label>IMMAGINE</Label>
+                    <Label Content="{CompiledBinding Username}" />
+                    <Label IsVisible="False">IMMAGINE</Label>
                     <!-- <Image asyncImageLoader:ImageLoader.Source="http://skins.rgbcraft.com/api/helm/Enn3DevPlayer" /> -->
                 </StackPanel>
-                <StackPanel HorizontalAlignment="Right">
+                <StackPanel HorizontalAlignment="Right" IsVisible="False">
                     <Label>SUS</Label>
                     <Label>NewRGB</Label>
                 </StackPanel>
             </StackPanel>
 
             <Panel VerticalAlignment="Bottom">
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Spacing="20">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Spacing="20" IsVisible="False">
                     <Label>NewRGB</Label>
                     <Label>NewRGB</Label>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="20">
-                    <Button Command="{Binding PlayBtn}">
-                        <Label Content="{Binding PlayText}" FontSize="20" />
+                    <Button Command="{CompiledBinding PlayBtn}">
+                        <Label Content="{CompiledBinding PlayText}" FontSize="20" />
                     </Button>
                     <Rectangle Fill="White" Width="2" />
                     <StackPanel Orientation="Vertical" MinWidth="200">

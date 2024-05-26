@@ -15,27 +15,23 @@ jobs:
           dotnet-version: 8.0.x
       - name: Setup MSBuild.exe
         uses: microsoft/setup-msbuild@v2
+      - name: Setup Velopack
+        run: |
+          dotnet tool update -g vpk
       - name: Build
         run: |
-          dotnet publish -r win-x64 --self-contained -p:PublishTrimmed=True
-      - name: Archive Release
-        uses: thedoctor0/zip-release@0.7.5
-        with:
-          type: 'zip'
-          filename: 'NewRGB-Win.zip'
-          directory: 'bin\Release\net8.0\win-x64\publish'
-          exclusions: '*.pdb'
+          build-win.bat
       - name: Upload
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: NewRGB.zip
-          path: bin\Release\net8.0\win-x64\publish\NewRGB-Win.zip
+          name: NewRGB-Win
+          path: releases/*
       - name: Publish in release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         if: github.ref_type == 'tag'
         with:
           files: |
-            bin/Release/net8.0/win-x64/publish/NewRGB-Win.zip
+            releases/*
           token: ${{ secrets.GITHUB_TOKEN }}
   build-linux:
     runs-on: ubuntu-latest
@@ -46,25 +42,22 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
+      - name: Setup Velopack
+        run: |
+          dotnet tool update -g vpk
       - name: Build
         run: |
-          dotnet publish -r linux-x64 --self-contained -p:PublishTrimmed=True
-      - name: Archive Release
-        uses: thedoctor0/zip-release@0.7.5
-        with:
-          type: '7z'
-          filename: 'NewRGB-Linux.7z'
-          directory: 'bin/Release/net8.0/linux-x64/publish'
-          exclusions: '*.dbg'
+          chmod +x build-linux.sh
+          bash build-linux.sh
       - name: Upload
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: NewRGB.zip
-          path: bin/Release/net8.0/linux-x64/publish/NewRGB-Linux.7z
+          name: NewRGB-Linux
+          path: releases/*
       - name: Publish in release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         if: github.ref_type == 'tag'
         with:
           files: |
-            bin/Release/net8.0/linux-x64/publish/NewRGB-Linux.7z
+            releases/*
           token: ${{ secrets.GITHUB_TOKEN }}

@@ -15,6 +15,8 @@
     <ItemGroup>
         <Folder Include="Models\"/>
         <AvaloniaResource Include="Assets\**"/>
+        <AvaloniaResource Remove="publish\**"/>
+        <AvaloniaResource Remove="releases\**"/>
     </ItemGroup>
 
     <ItemGroup>
@@ -37,11 +39,37 @@
         <PackageReference Include="SharpCompress" Version="0.36.0"/>
         <PackageReference Include="System.Diagnostics.PerformanceCounter" Version="8.0.0"/>
         <PackageReference Include="System.Management" Version="8.0.0"/>
+        <PackageReference Include="Velopack" Version="0.0.359"/>
     </ItemGroup>
 
     <ItemGroup>
         <Reference Include="System.Diagnostics.PerformanceCounter">
             <HintPath>..\..\..\.nuget\packages\system.diagnostics.performancecounter\8.0.0\lib\net8.0\System.Diagnostics.PerformanceCounter.dll</HintPath>
         </Reference>
+    </ItemGroup>
+
+    <ItemGroup>
+        <AvaloniaXaml Remove="publish\**"/>
+        <AvaloniaXaml Remove="releases\**"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Compile Remove="publish\**"/>
+        <Compile Remove="releases\**"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <EmbeddedResource Remove="publish\**"/>
+        <EmbeddedResource Remove="releases\**"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <AdditionalFiles Remove="publish\**"/>
+        <AdditionalFiles Remove="releases\**"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Remove="publish\**"/>
+        <None Remove="releases\**"/>
     </ItemGroup>
 </Project>

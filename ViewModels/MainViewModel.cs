@@ -17,6 +17,7 @@ using ProjBobcat.DefaultComponent.Installer.ForgeInstaller;
 using ProjBobcat.DefaultComponent.ResourceInfoResolver;
 using ProjBobcat.Interface;
 using ReactiveUI;
+using Velopack;
 
 namespace NewRGB.ViewModels;
 
@@ -29,6 +30,8 @@ public class MainViewModel : ViewModelBase
     private readonly Technic _technic = new("newrgb");
     private bool _needsUpdate;
     private Process? _gameProcess;
+    private readonly UpdateManager _updateManager;
+    private UpdateInfo? _updateInfo;
 
     public MainViewModel()
     {
@@ -41,6 +44,7 @@ public class MainViewModel : ViewModelBase
                        "SOMETHING_WENT_WRONG_2";
         else
             Username = "SOMETHING_WENT_WRONG_3";
+        _updateManager = new UpdateManager("https://github.com/rgbcraft/NewRGBLauncher/releases/latest");
     }
 
     public ReactiveCommand<Unit, Unit> LogoCommand { get; }
@@ -274,7 +278,22 @@ public class MainViewModel : ViewModelBase
 
     private async Task OnPlayButton()
     {
-        if (_needsUpdate)
+        if (_gameProcess != null)
+        {
+            if (_gameProcess.HasExited) _gameProcess = null;
+            else return;
+        }
+
+        if (_updateInfo != null)
+        {
+            UpdateProgress(0.0f, "Updating launcher");
+            await _updateManager.DownloadUpdatesAsync(_updateInfo,
+                i => UpdateProgress((float)i / 100, "Updating launcher"));
+            UpdateProgress(1.0f, "Restarting launcher", false);
+            await Task.Delay(1000);
+            _updateManager.ApplyUpdatesAndRestart(_updateInfo);
+        }
+        else if (_needsUpdate)
         {
             await DownloadUpdate();
             await InstallUpdate();
@@ -352,6 +371,22 @@ public class MainViewModel : ViewModelBase
 
     public async Task AsyncOnLoaded()
     {
+        try
+        {
+            UpdateProgress(0.0f, "Checking for launcher updates", false);
+            _updateInfo = await _updateManager.CheckForUpdatesAsync();
+            if (_updateInfo != null)
+            {
+                UpdateProgress(1.0f, "Found launcher updates");
+                PlayText = "Update";
+                return;
+            }
+        }
+        catch (Exception)
+        {
+            // ignored
+        }
+
         UpdateProgress(0.0f, "Checking for updates", false);
         await _technic.Init();
         _needsUpdate = await _technic.CheckUpdate();
