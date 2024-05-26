@@ -28,4 +28,4 @@ vpk pack -u NewRGB -v "$BUILD_VERSION" -o "$RELEASE_DIR" -p "$PUBLISH_DIR"
 
 echo ""
 echo "Uploading..."
-vpk upload github --repoUrl "https://github.com/rgbcraft/NewRGBLauncher/" --merge --releaseName "v$1" --tag "$1" --token "$2"
+vpk upload github --repoUrl "https://github.com/rgbcraft/NewRGBLauncher/" --merge --releaseName "v$1" --tag "$1" --token "$2" -o "$RELEASE_DIR"
