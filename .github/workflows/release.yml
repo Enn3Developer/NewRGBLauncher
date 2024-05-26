@@ -21,7 +21,7 @@ jobs:
       - name: Build
         run: |
           dotnet publish -c Release --no-self-contained -r win-x64 -o publish -p:PublishTrimmed=true
-          vpk download http --url https://github.com/rgbcraft/NewRGBLauncher/releases/latest
+          vpk download github --repoUrl https://github.com/rgbcraft/NewRGBLauncher/
           vpk pack -u NewRGB -o releases -p publish -f net8-x64-desktop -v ${{github.ref_name}}
       - name: Upload
         uses: actions/upload-artifact@v4

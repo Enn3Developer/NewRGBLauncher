@@ -20,7 +20,7 @@ dotnet publish -c Release --self-contained -r linux-x64 -o "$PUBLISH_DIR" -p:Pub
 
 echo ""
 echo "Downloading latest release"
-vpk download http --url https://github.com/rgbcraft/NewRGBLauncher/releases/latest
+vpk download github --repoUrl https://github.com/rgbcraft/NewRGBLauncher/
 
 echo ""
 echo "Building Velopack Release v$BUILD_VERSION"

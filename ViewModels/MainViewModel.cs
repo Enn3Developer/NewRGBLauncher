@@ -20,6 +20,7 @@ using ProjBobcat.DefaultComponent.ResourceInfoResolver;
 using ProjBobcat.Interface;
 using ReactiveUI;
 using Velopack;
+using Velopack.Sources;
 
 namespace NewRGB.ViewModels;
 
@@ -47,7 +48,7 @@ public class MainViewModel : ViewModelBase
                        "SOMETHING_WENT_WRONG_2";
         else
             Username = "SOMETHING_WENT_WRONG_3";
-        _updateManager = new UpdateManager("https://github.com/rgbcraft/NewRGBLauncher/releases/latest");
+        _updateManager = new UpdateManager(new GithubSource("https://github.com/rgbcraft/NewRGBLauncher/", null, false));
     }
 
     public ReactiveCommand<Unit, Unit> LogoCommand { get; }
