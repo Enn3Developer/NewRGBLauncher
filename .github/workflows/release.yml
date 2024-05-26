@@ -50,8 +50,9 @@ jobs:
           dotnet tool update -g vpk
       - name: Build
         run: |
-          dotnet publish -c Release --self-contained -r linux-x64 -o publish -p:PublishTrimmed=True
-          vpk pack -u NewRGB -v "${{github.ref_name}}" -o "release" -p "publish"
+          chmod +x build-linux.sh
+          bash build-linux.sh ${{github.ref_name}}
+          ls
       - name: Upload
         uses: actions/upload-artifact@v4
         with:
