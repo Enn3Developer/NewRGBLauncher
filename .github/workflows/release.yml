@@ -20,7 +20,7 @@ jobs:
           dotnet tool update -g vpk
       - name: Build
         run: |
-          build-win.bat
+          build-win.bat ${{github.ref_name}}
       - name: Upload
         uses: actions/upload-artifact@v4
         with:
@@ -48,7 +48,7 @@ jobs:
       - name: Build
         run: |
           chmod +x build-linux.sh
-          bash build-linux.sh
+          bash build-linux.sh ${{github.ref_name}}
       - name: Upload
         uses: actions/upload-artifact@v4
         with:
