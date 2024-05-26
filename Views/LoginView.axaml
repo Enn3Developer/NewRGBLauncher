@@ -3,12 +3,11 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:NewRGB.ViewModels"
-             xmlns:asyncImageLoader="clr-namespace:AsyncImageLoader;assembly=AsyncImageLoader.Avalonia"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="NewRGB.Views.LoginView"
              x:DataType="vm:LoginViewModel">
     <Panel>
-        <Image asyncImageLoader:ImageLoader.Source="https://newrgb.enn3.ovh/background/0" Stretch="Fill" />
+        <Image Source="/Assets/0.png" Stretch="Fill" />
         <Panel HorizontalAlignment="Center" VerticalAlignment="Center" MinHeight="100" MinWidth="300">
             <Rectangle Fill="Black" Opacity="80" />
             <Panel Name="AuthenticationMethod" IsVisible="{Binding VisibleMethod}">
