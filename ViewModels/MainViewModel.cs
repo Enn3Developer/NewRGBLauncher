@@ -7,6 +7,8 @@ using System.Reactive;
 using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Threading.Tasks;
+using mcswlib.ServerStatus;
+using mcswlib.ServerStatus.Event;
 using NewRGB.Data;
 using ProjBobcat.Class.Model;
 using ProjBobcat.Class.Model.LauncherProfile;
@@ -32,6 +34,7 @@ public class MainViewModel : ViewModelBase
     private Process? _gameProcess;
     private readonly UpdateManager _updateManager;
     private UpdateInfo? _updateInfo;
+    private string _serverInfo = "0/20";
 
     public MainViewModel()
     {
@@ -71,6 +74,12 @@ public class MainViewModel : ViewModelBase
     {
         get => _determinateValue;
         private set => this.RaiseAndSetIfChanged(ref _determinateValue, !value);
+    }
+
+    public string ServerInfo
+    {
+        get => _serverInfo;
+        private set => this.RaiseAndSetIfChanged(ref _serverInfo, value);
     }
 
     private async Task<string?> CheckJava()
@@ -235,7 +244,7 @@ public class MainViewModel : ViewModelBase
                         JavaExecutable = javaPath, //The path of Java executable
                         Resolution = new ResolutionModel // Game Window's Resolution
                         {
-                            Height = 600, // Height
+                            Height = 500, // Height
                             Width = 800 // Width
                         },
                         MinMemory = 4096, // Minimal Memory
@@ -371,9 +380,18 @@ public class MainViewModel : ViewModelBase
 
     public async Task AsyncOnLoaded()
     {
+        UpdateProgress(0.0f, "Checking for launcher updates", false);
+
+        var factory = new ServerStatusFactory();
+        factory.ServerChanged += (sender, e) =>
+        {
+            var srv = (ServerStatus)sender!;
+            ServerInfo = $"{srv.PlayerCount}/{srv.MaxPlayerCount}";
+        };
+        factory.Make("kamino.a-centauri.com", 25565, false, "One");
+        factory.StartAutoUpdate();
         try
         {
-            UpdateProgress(0.0f, "Checking for launcher updates", false);
             _updateInfo = await _updateManager.CheckForUpdatesAsync();
             if (_updateInfo != null)
             {
