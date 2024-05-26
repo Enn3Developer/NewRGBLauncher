@@ -7,17 +7,17 @@ namespace NewRGB.Data;
 
 public class DownloadProgress(byte[] buffer, FileStream fileStream, long length, Stream stream)
 {
-    public const int BufferSize = 4096;
+    private const int BufferSize = 4096;
 
     public long Length { get; } = length;
 
     public static async Task<DownloadProgress?> Download(string url, string path, HttpClient? httpClient = null)
     {
         httpClient ??= new HttpClient();
-        var fileStream = File.OpenWrite(path);
+        var fileStream = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.Read, BufferSize, true);
         try
         {
-            var response = await httpClient.GetAsync(url);
+            var response = await httpClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
             response.EnsureSuccessStatusCode();
             if (response.Content.Headers.ContentLength == null) throw new Exception("content length is null");
             var length = response.Content.Headers.ContentLength.Value;
@@ -33,9 +33,9 @@ public class DownloadProgress(byte[] buffer, FileStream fileStream, long length,
 
     public async Task<long> Progress()
     {
-        var bytesRead = (long)await stream.ReadAsync(buffer);
+        var bytesRead = await stream.ReadAsync(buffer);
         if (bytesRead == 0) return 0;
-        await fileStream.WriteAsync(buffer);
+        await fileStream.WriteAsync(buffer.AsMemory(0, bytesRead));
         return bytesRead;
     }
 
@@ -43,6 +43,7 @@ public class DownloadProgress(byte[] buffer, FileStream fileStream, long length,
     {
         await fileStream.FlushAsync();
         fileStream.Close();
+        await stream.DisposeAsync();
         await fileStream.DisposeAsync();
     }
 }

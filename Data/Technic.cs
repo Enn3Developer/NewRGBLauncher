@@ -15,6 +15,7 @@ public class Technic(string modpackName)
     private const int BuildVersion = 69420;
     private string _version = "";
     private string _downloadUrl = "";
+    private string _modpackZipPath = Path.Combine(DataManager.Instance.DataPath, "modpack.zip");
 
     public async Task Init()
     {
@@ -43,25 +44,23 @@ public class Technic(string modpackName)
 
     public Task<DownloadProgress?> DownloadUpdate()
     {
-        var path = Path.Combine(DataManager.Instance.DataPath, "modpack.zip");
-        return DownloadProgress.Download(_downloadUrl, path, _httpClient);
+        return DownloadProgress.Download(_downloadUrl, _modpackZipPath, _httpClient);
     }
 
     public async Task<InstallProgress> InstallUpdate()
     {
-        var zippedFile = Path.Combine(DataManager.Instance.DataPath, "modpack.zip");
-        var mcDir = Path.Combine(DataManager.Instance.DataPath, ".minecraft");
+        var mcDir = DataManager.Instance.MinecraftPath;
         var modDir = Path.Combine(mcDir, "mods");
         if (!Directory.Exists(mcDir)) Directory.CreateDirectory(mcDir);
         if (Directory.Exists(modDir)) Directory.Delete(modDir, true);
-        var archive = await Task.Run(() => ZipFile.OpenRead(zippedFile));
+        var archive = await Task.Run(() => ZipFile.OpenRead(_modpackZipPath));
         var fileList = new List<ZipArchiveEntry>(256);
         fileList.AddRange(archive.Entries);
-        return new InstallProgress(fileList, mcDir);
+        return new InstallProgress(fileList, mcDir, _modpackZipPath);
     }
 }
 
-public class InstallProgress(List<ZipArchiveEntry> fileList, string mcDir)
+public class InstallProgress(List<ZipArchiveEntry> fileList, string mcDir, string filePath)
 {
     public int Length => fileList.Count;
 
@@ -70,14 +69,15 @@ public class InstallProgress(List<ZipArchiveEntry> fileList, string mcDir)
         if (i >= Length) return;
         var file = fileList[i];
         var path = Path.Combine(mcDir, file.FullName.Replace('/', Path.DirectorySeparatorChar));
-        if (path.EndsWith(Path.DirectorySeparatorChar)) Directory.CreateDirectory(path);
-        else await Task.Run(() => file.ExtractToFile(path));
+        if (path.EndsWith(Path.DirectorySeparatorChar))
+            Directory.CreateDirectory(path);
+        else
+            await Task.Run(() => file.ExtractToFile(path, true));
     }
 
     public void End()
     {
-        var zipPath = Path.Combine(DataManager.Instance.DataPath, "modpack.zip");
         fileList.Clear();
-        File.Delete(zipPath);
+        File.Delete(filePath);
     }
 }
