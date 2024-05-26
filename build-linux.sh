@@ -4,7 +4,7 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # Check if version parameter is provided
-if [ "$#" -ne 1 ]; then
+if [ "$#" -ne 2 ]; then
     echo "Version number is required."
     echo "Usage: ./build.sh [version]"
     exit 1
