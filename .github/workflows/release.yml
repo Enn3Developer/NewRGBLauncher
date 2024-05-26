@@ -26,13 +26,13 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: NewRGB-Win
-          path: /releases/*
+          path: %~dp0releases
       - name: Publish in release
         uses: softprops/action-gh-release@v2
         if: github.ref_type == 'tag'
         with:
           files: |
-            /releases/*
+            %~dp0releases
           token: ${{ secrets.GITHUB_TOKEN }}
   build-linux:
     runs-on: ubuntu-latest
