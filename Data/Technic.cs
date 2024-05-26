@@ -56,11 +56,11 @@ public class Technic(string modpackName)
         var archive = await Task.Run(() => ZipFile.OpenRead(_modpackZipPath));
         var fileList = new List<ZipArchiveEntry>(256);
         fileList.AddRange(archive.Entries);
-        return new InstallProgress(fileList, mcDir, _modpackZipPath);
+        return new InstallProgress(fileList, mcDir, _modpackZipPath, archive);
     }
 }
 
-public class InstallProgress(List<ZipArchiveEntry> fileList, string mcDir, string filePath)
+public class InstallProgress(List<ZipArchiveEntry> fileList, string mcDir, string filePath, ZipArchive archive)
 {
     public int Length => fileList.Count;
 
@@ -78,6 +78,7 @@ public class InstallProgress(List<ZipArchiveEntry> fileList, string mcDir, strin
     public void End()
     {
         fileList.Clear();
+        archive.Dispose();
         File.Delete(filePath);
     }
 }
