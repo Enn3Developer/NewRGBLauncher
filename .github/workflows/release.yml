@@ -23,18 +23,7 @@ jobs:
           dotnet publish -c Release --no-self-contained -r win-x64 -o publish -p:PublishTrimmed=true
           vpk download github --repoUrl https://github.com/rgbcraft/NewRGBLauncher/
           vpk pack -u NewRGB -o releases -p publish -f net8-x64-desktop -v ${{github.ref_name}}
-      - name: Upload
-        uses: actions/upload-artifact@v4
-        with:
-          name: NewRGB-Win
-          path: releases/*
-      - name: Publish in release
-        uses: softprops/action-gh-release@v2
-        if: github.ref_type == 'tag'
-        with:
-          files: |
-            releases/*
-          token: ${{ secrets.GITHUB_TOKEN }}
+          vpk upload github --repoUrl "https://github.com/rgbcraft/NewRGBLauncher/" --merge --releaseName v${{github.ref_name}} --tag ${{github.ref_name}} --token ${{ secrets.GITHUB_TOKEN }}
   build-linux:
     runs-on: ubuntu-latest
     steps:
@@ -52,16 +41,4 @@ jobs:
       - name: Build
         run: |
           chmod +x build-linux.sh
-          bash build-linux.sh ${{github.ref_name}}
-      - name: Upload
-        uses: actions/upload-artifact@v4
-        with:
-          name: NewRGB-Linux
-          path: releases/*
-      - name: Publish in release
-        uses: softprops/action-gh-release@v2
-        if: github.ref_type == 'tag'
-        with:
-          files: |
-            releases/*
-          token: ${{ secrets.GITHUB_TOKEN }}
+          bash build-linux.sh ${{github.ref_name}} ${{ secrets.GITHUB_TOKEN }}
