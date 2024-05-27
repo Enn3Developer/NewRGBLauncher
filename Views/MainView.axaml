@@ -31,10 +31,9 @@
             </Button>
 
             <StackPanel HorizontalAlignment="Right">
-                <StackPanel Orientation="Horizontal">
-                    <Label Content="{CompiledBinding Username}" />
-                    <Label IsVisible="False">IMMAGINE</Label>
-                    <!-- <Image asyncImageLoader:ImageLoader.Source="http://skins.rgbcraft.com/api/helm/Enn3DevPlayer" /> -->
+                <StackPanel Orientation="Horizontal" Spacing="10">
+                    <Label Content="{CompiledBinding Username}" VerticalAlignment="Center" FontSize="16" />
+                    <Image Source="{CompiledBinding ProfileAvatar}" />
                 </StackPanel>
                 <StackPanel HorizontalAlignment="Right" IsVisible="False">
                     <Label>SUS</Label>
@@ -44,8 +43,8 @@
 
             <Panel VerticalAlignment="Bottom">
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Spacing="5">
-                    <Label FontSize="16" FontWeight="Bold">Server</Label>
-                    <Label Content="{CompiledBinding ServerInfo}" />
+                    <Label FontSize="16" FontWeight="Bold" VerticalContentAlignment="Center">Server</Label>
+                    <Label Content="{CompiledBinding ServerInfo}" VerticalContentAlignment="Center" />
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="20">
                     <Button Command="{CompiledBinding PlayBtn}" IsEnabled="{CompiledBinding IsPlayEnabled}">

@@ -8,8 +8,12 @@ using System.Runtime.InteropServices;
 using System.Security.AccessControl;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Avalonia.Controls;
+using Avalonia.Media.Imaging;
+using Avalonia.Threading;
 using mcswlib.ServerStatus;
 using NewRGB.Data;
+using NewRGB.Views;
 using ProjBobcat.Class.Model;
 using ProjBobcat.Class.Model.LauncherProfile;
 using ProjBobcat.Class.Model.Mojang;
@@ -39,6 +43,7 @@ public class MainViewModel : ViewModelBase
     private string _serverInfo = "0/20";
     private bool _needsJava;
     private bool _isPlayEnabled;
+    private Bitmap? _profileAvatar;
 
     public MainViewModel()
     {
@@ -91,6 +96,12 @@ public class MainViewModel : ViewModelBase
     {
         get => _isPlayEnabled;
         private set => this.RaiseAndSetIfChanged(ref _isPlayEnabled, value);
+    }
+
+    public Bitmap? ProfileAvatar
+    {
+        get => _profileAvatar;
+        private set => this.RaiseAndSetIfChanged(ref _profileAvatar, value);
     }
 
     private async Task<string?> CheckJava()
@@ -400,6 +411,10 @@ public class MainViewModel : ViewModelBase
             await CheckForge(javaPath);
             UpdateProgress(1.0f, "Launching RGBcraft", false);
             await Launch(javaPath);
+            await Task.Delay(25000);
+            UpdateProgress(1.0f, "Hiding launcher", false);
+            await Task.Delay(2000);
+            if (MainWindow.Instance != null) MainWindow.Instance.WindowState = WindowState.Minimized;
             UpdateProgress(1.0f, "Ready");
         }
     }
@@ -453,15 +468,47 @@ public class MainViewModel : ViewModelBase
         UpdateProgress(1.0f, "Update installed");
     }
 
+    private async Task DownloadProfileAvatar()
+    {
+        var httpClient = new HttpClient();
+        httpClient.DefaultRequestHeaders.Add("User-Agent",
+            "Mozilla/5.0 (X11; Linux x86_64; rv:126.0) Gecko/20100101 Firefox/126.0");
+        var path = Path.Combine(DataManager.Instance.DataPath, "avatar.png");
+        var response = await httpClient.GetAsync($"http://skins.rgbcraft.com/api/helm/{Username}/1024");
+        response.EnsureSuccessStatusCode();
+        await using (var stream = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.Read, 1024, true))
+        {
+            await response.Content.CopyToAsync(stream);
+        }
+
+        response.Dispose();
+
+        await using (var stream = File.OpenRead(path))
+        {
+            ProfileAvatar = Bitmap.DecodeToWidth(stream, 48);
+        }
+    }
+
     public async Task AsyncOnLoaded()
     {
         UpdateProgress(0.0f, "Checking for launcher updates", false);
+        var profileAvatarPath = Path.Combine(DataManager.Instance.DataPath, "avatar.png");
+        if (File.Exists(profileAvatarPath))
+        {
+            await using var stream = File.OpenRead(profileAvatarPath);
+            ProfileAvatar = Bitmap.DecodeToWidth(stream, 48);
+        }
+
+        await DownloadProfileAvatar();
 
         var factory = new ServerStatusFactory();
         factory.ServerChanged += (sender, _) =>
         {
-            var srv = (ServerStatus)sender!;
-            ServerInfo = $"{srv.PlayerCount}/{srv.MaxPlayerCount}";
+            Dispatcher.UIThread.Invoke(() =>
+            {
+                var srv = (ServerStatus)sender!;
+                ServerInfo = $"{srv.PlayerCount}/{srv.MaxPlayerCount}";
+            });
         };
         factory.Make("kamino.a-centauri.com", 25565, false, "One");
         factory.StartAutoUpdate();
