@@ -48,7 +48,7 @@
                     <Label Content="{CompiledBinding ServerInfo}" />
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="20">
-                    <Button Command="{CompiledBinding PlayBtn}">
+                    <Button Command="{CompiledBinding PlayBtn}" IsEnabled="{CompiledBinding IsPlayEnabled}">
                         <Label Content="{CompiledBinding PlayText}" FontSize="20" />
                     </Button>
                     <Rectangle Fill="White" Width="2" />

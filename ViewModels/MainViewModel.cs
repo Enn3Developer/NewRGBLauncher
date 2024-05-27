@@ -38,6 +38,7 @@ public class MainViewModel : ViewModelBase
     private UpdateInfo? _updateInfo;
     private string _serverInfo = "0/20";
     private bool _needsJava;
+    private bool _isPlayEnabled;
 
     public MainViewModel()
     {
@@ -84,6 +85,12 @@ public class MainViewModel : ViewModelBase
     {
         get => _serverInfo;
         private set => this.RaiseAndSetIfChanged(ref _serverInfo, value);
+    }
+
+    public bool IsPlayEnabled
+    {
+        get => _isPlayEnabled;
+        private set => this.RaiseAndSetIfChanged(ref _isPlayEnabled, value);
     }
 
     private async Task<string?> CheckJava()
@@ -404,7 +411,9 @@ public class MainViewModel : ViewModelBase
 
     private async Task OnPlayButton()
     {
+        IsPlayEnabled = false;
         await PlayButtonRun();
+        IsPlayEnabled = true;
     }
 
     private async Task DownloadUpdate()
@@ -468,6 +477,7 @@ public class MainViewModel : ViewModelBase
             {
                 UpdateProgress(1.0f, "Found launcher updates");
                 PlayText = "Update";
+                IsPlayEnabled = true;
                 return;
             }
         }
@@ -489,6 +499,8 @@ public class MainViewModel : ViewModelBase
         {
             UpdateProgress(1.0f, "Ready");
         }
+
+        IsPlayEnabled = true;
     }
 
     private void UpdateProgress(float value, string desc, bool determinateValue = true)
