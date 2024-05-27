@@ -370,7 +370,6 @@ public class MainViewModel : ViewModelBase
             await _updateManager.DownloadUpdatesAsync(_updateInfo,
                 i => UpdateProgress((float)i / 100, "Updating launcher"));
             UpdateProgress(1.0f, "Restarting launcher", false);
-            await Task.Delay(1000);
             _updateManager.ApplyUpdatesAndRestart(_updateInfo);
         }
         else if (_needsJava)
@@ -398,12 +397,8 @@ public class MainViewModel : ViewModelBase
             }
 
             await CheckMinecraft();
-            await Task.Delay(1000);
             await CheckForge(javaPath);
-            UpdateProgress(1.0f, "Done");
-            await Task.Delay(1000);
             UpdateProgress(1.0f, "Launching RGBcraft", false);
-            await Task.Delay(1000);
             await Launch(javaPath);
             UpdateProgress(1.0f, "Ready");
         }
@@ -489,7 +484,6 @@ public class MainViewModel : ViewModelBase
         UpdateProgress(0.0f, "Checking for updates", false);
         await _technic.Init();
         _needsUpdate = await _technic.CheckUpdate();
-        await Task.Delay(1000);
         if (_needsUpdate)
         {
             PlayText = "Update";
