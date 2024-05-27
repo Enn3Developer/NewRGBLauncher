@@ -17,7 +17,7 @@ jobs:
         uses: microsoft/setup-msbuild@v2
       - name: Setup Velopack
         run: |
-          dotnet tool update -g vpk
+          dotnet tool update -g vpk --version 0.0.503-gc69e323 
       - name: Build
         run: |
           dotnet publish -c Release --no-self-contained -r win-x64 -o publish -p:PublishTrimmed=true
@@ -37,7 +37,7 @@ jobs:
         run: |
           sudo add-apt-repository universe
           sudo apt install libfuse2
-          dotnet tool update -g vpk
+          dotnet tool update -g vpk --version 0.0.503-gc69e323 
       - name: Build
         run: |
           chmod +x build-linux.sh

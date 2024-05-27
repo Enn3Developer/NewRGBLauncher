@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <Version>0.2.4</Version>
+        <Version>0.3.0</Version>
         <OutputType>WinExe</OutputType>
         <TargetFramework>net8.0</TargetFramework>
         <Nullable>enable</Nullable>
@@ -40,7 +40,7 @@
         <PackageReference Include="SharpCompress" Version="0.36.0"/>
         <PackageReference Include="System.Diagnostics.PerformanceCounter" Version="8.0.0"/>
         <PackageReference Include="System.Management" Version="8.0.0"/>
-        <PackageReference Include="Velopack" Version="0.0.359"/>
+        <PackageReference Include="Velopack" Version="0.0.503-gc69e323"/>
     </ItemGroup>
 
     <ItemGroup>
