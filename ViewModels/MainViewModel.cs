@@ -5,10 +5,10 @@ using System.IO;
 using System.Net.Http;
 using System.Reactive;
 using System.Runtime.InteropServices;
+using System.Security.AccessControl;
 using System.Text.Json;
 using System.Threading.Tasks;
 using mcswlib.ServerStatus;
-using mcswlib.ServerStatus.Event;
 using NewRGB.Data;
 using ProjBobcat.Class.Model;
 using ProjBobcat.Class.Model.LauncherProfile;
@@ -21,6 +21,7 @@ using ProjBobcat.Interface;
 using ReactiveUI;
 using Velopack;
 using Velopack.Sources;
+using FileInfo = System.IO.FileInfo;
 
 namespace NewRGB.ViewModels;
 
@@ -36,6 +37,7 @@ public class MainViewModel : ViewModelBase
     private readonly UpdateManager _updateManager;
     private UpdateInfo? _updateInfo;
     private string _serverInfo = "0/20";
+    private bool _needsJava;
 
     public MainViewModel()
     {
@@ -48,7 +50,8 @@ public class MainViewModel : ViewModelBase
                        "SOMETHING_WENT_WRONG_2";
         else
             Username = "SOMETHING_WENT_WRONG_3";
-        _updateManager = new UpdateManager(new GithubSource("https://github.com/rgbcraft/NewRGBLauncher/", null, false));
+        _updateManager =
+            new UpdateManager(new GithubSource("https://github.com/rgbcraft/NewRGBLauncher/", null, false));
     }
 
     public ReactiveCommand<Unit, Unit> LogoCommand { get; }
@@ -86,6 +89,22 @@ public class MainViewModel : ViewModelBase
     private async Task<string?> CheckJava()
     {
         UpdateProgress(0.0f, "Checking Java version", false);
+        var possibleJavaPath =
+            Path.Combine(DataManager.Instance.DataPath, "runtime", "jdk-21.0.3+9-jre", "bin", "java");
+        if (File.Exists(possibleJavaPath))
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                new FileInfo(possibleJavaPath).GetAccessControl().AddAccessRule(new FileSystemAccessRule(
+                    Environment.UserName, FileSystemRights.ReadAndExecute,
+                    AccessControlType.Allow));
+            else
+                File.SetUnixFileMode(possibleJavaPath,
+                    File.GetUnixFileMode(possibleJavaPath) | UnixFileMode.UserExecute);
+
+            if (await DataManager.IsValidJava(possibleJavaPath))
+                return possibleJavaPath;
+        }
+
         var javaList = ProjBobcat.Class.Helper.SystemInfoHelper.FindJava();
         var javaEnumerator = javaList.GetAsyncEnumerator();
         var valid = false;
@@ -96,6 +115,7 @@ public class MainViewModel : ViewModelBase
             break;
         }
 
+        valid = false;
         return valid ? javaEnumerator.Current : null;
     }
 
@@ -286,7 +306,51 @@ public class MainViewModel : ViewModelBase
         Console.WriteLine(result.Error.Cause);
     }
 
-    private async Task OnPlayButton()
+    private async Task InstallJava()
+    {
+        UpdateProgress(0.0f, "Downloading Java");
+        DownloadProgress? progress = null;
+        string? path = null;
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        {
+            path = Path.Combine(DataManager.Instance.DataPath, "java.tar");
+            progress = await DownloadProgress.Download(
+                "https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.3%2B9/OpenJDK21U-jre_x64_linux_hotspot_21.0.3_9.tar.gz",
+                path);
+        }
+        else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        {
+            path = Path.Combine(DataManager.Instance.DataPath, "java.tar");
+            progress = await DownloadProgress.Download(
+                "https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.3%2B9/OpenJDK21U-jre_aarch64_mac_hotspot_21.0.3_9.tar.gz",
+                path);
+        }
+        else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            path = Path.Combine(DataManager.Instance.DataPath, "java.zip");
+            progress = await DownloadProgress.Download(
+                "https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.3%2B9/OpenJDK21U-jre_x64_windows_hotspot_21.0.3_9.zip",
+                path);
+        }
+
+        if (progress == null || path == null)
+        {
+            UpdateProgress(1.0f, "Can't download java");
+            return;
+        }
+
+        await DownloadAndProgress(progress, "Java");
+        UpdateProgress(0.0f, "Installing Java", false);
+        var installProgress =
+            await InstallProgress.Install(Path.Combine(DataManager.Instance.DataPath, "runtime"), path);
+        await installProgress.Run();
+        await installProgress.End();
+        UpdateProgress(1.0f, "Java installed");
+        _needsJava = false;
+        PlayText = "Play";
+    }
+
+    private async Task PlayButtonRun()
     {
         if (_gameProcess != null)
         {
@@ -303,6 +367,10 @@ public class MainViewModel : ViewModelBase
             await Task.Delay(1000);
             _updateManager.ApplyUpdatesAndRestart(_updateInfo);
         }
+        else if (_needsJava)
+        {
+            await InstallJava();
+        }
         else if (_needsUpdate)
         {
             await DownloadUpdate();
@@ -318,6 +386,8 @@ public class MainViewModel : ViewModelBase
             if (javaPath == null)
             {
                 UpdateProgress(1.0f, "No valid java installation found");
+                PlayText = "Install";
+                _needsJava = true;
                 return;
             }
 
@@ -331,6 +401,11 @@ public class MainViewModel : ViewModelBase
             await Launch(javaPath);
             UpdateProgress(1.0f, "Ready");
         }
+    }
+
+    private async Task OnPlayButton()
+    {
+        await PlayButtonRun();
     }
 
     private async Task DownloadUpdate()
@@ -367,16 +442,12 @@ public class MainViewModel : ViewModelBase
     private async Task InstallUpdate()
     {
         var progress = await _technic.InstallUpdate();
-        UpdateProgress(0.0f, "Installing update");
-        for (var i = 0; i < progress.Length; i++)
-        {
-            await progress.Progress(i);
-            UpdateProgress((float)i / progress.Length, "Installing update");
-        }
+        UpdateProgress(0.0f, "Installing update", false);
+        await progress.Run();
 
-        progress.End();
+        await progress.End();
 
-        UpdateProgress(1.0f, "Installing update");
+        UpdateProgress(1.0f, "Update installed");
     }
 
     public async Task AsyncOnLoaded()
@@ -384,7 +455,7 @@ public class MainViewModel : ViewModelBase
         UpdateProgress(0.0f, "Checking for launcher updates", false);
 
         var factory = new ServerStatusFactory();
-        factory.ServerChanged += (sender, e) =>
+        factory.ServerChanged += (sender, _) =>
         {
             var srv = (ServerStatus)sender!;
             ServerInfo = $"{srv.PlayerCount}/{srv.MaxPlayerCount}";
@@ -401,9 +472,9 @@ public class MainViewModel : ViewModelBase
                 return;
             }
         }
-        catch (Exception)
+        catch (Exception e)
         {
-            // ignored
+            Console.Error.WriteLine(e);
         }
 
         UpdateProgress(0.0f, "Checking for updates", false);

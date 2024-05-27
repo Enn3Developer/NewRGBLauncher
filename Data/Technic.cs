@@ -1,7 +1,5 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.IO.Compression;
 using System.Net.Http;
 using System.Text.Json.Nodes;
 using System.Threading.Tasks;
@@ -15,7 +13,7 @@ public class Technic(string modpackName)
     private const int BuildVersion = 69420;
     private string _version = "";
     private string _downloadUrl = "";
-    private string _modpackZipPath = Path.Combine(DataManager.Instance.DataPath, "modpack.zip");
+    private readonly string _modpackZipPath = Path.Combine(DataManager.Instance.DataPath, "modpack.zip");
 
     public async Task Init()
     {
@@ -53,32 +51,6 @@ public class Technic(string modpackName)
         var modDir = Path.Combine(mcDir, "mods");
         if (!Directory.Exists(mcDir)) Directory.CreateDirectory(mcDir);
         if (Directory.Exists(modDir)) Directory.Delete(modDir, true);
-        var archive = await Task.Run(() => ZipFile.OpenRead(_modpackZipPath));
-        var fileList = new List<ZipArchiveEntry>(256);
-        fileList.AddRange(archive.Entries);
-        return new InstallProgress(fileList, mcDir, _modpackZipPath, archive);
-    }
-}
-
-public class InstallProgress(List<ZipArchiveEntry> fileList, string mcDir, string filePath, ZipArchive archive)
-{
-    public int Length => fileList.Count;
-
-    public async Task Progress(int i)
-    {
-        if (i >= Length) return;
-        var file = fileList[i];
-        var path = Path.Combine(mcDir, file.FullName.Replace('/', Path.DirectorySeparatorChar));
-        if (path.EndsWith(Path.DirectorySeparatorChar))
-            Directory.CreateDirectory(path);
-        else
-            await Task.Run(() => file.ExtractToFile(path, true));
-    }
-
-    public void End()
-    {
-        fileList.Clear();
-        archive.Dispose();
-        File.Delete(filePath);
+        return await InstallProgress.Install(mcDir, _modpackZipPath);
     }
 }
