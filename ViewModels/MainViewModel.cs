@@ -115,7 +115,6 @@ public class MainViewModel : ViewModelBase
             break;
         }
 
-        valid = false;
         return valid ? javaEnumerator.Current : null;
     }
 
