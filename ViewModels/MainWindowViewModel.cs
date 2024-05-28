@@ -1,5 +1,4 @@
-﻿using System;
-using System.Net;
+﻿using System.Net;
 using NewRGB.Data;
 using ProjBobcat.Class.Model;
 using ProjBobcat.DefaultComponent.Authenticator;

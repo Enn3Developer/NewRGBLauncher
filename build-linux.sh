@@ -16,7 +16,7 @@ PUBLISH_DIR="$SCRIPT_DIR/publish"
 
 echo ""
 echo "Compiling NewRGB with dotnet..."
-dotnet publish -c Release --self-contained -r linux-x64 -o "$PUBLISH_DIR" -p:PublishTrimmed=True
+dotnet publish -c Release --self-contained -r linux-x64 -o "$PUBLISH_DIR"
 
 echo ""
 echo "Downloading latest release"
