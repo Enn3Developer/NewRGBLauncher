@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Text;
 using ProjBobcat.Class.Model.LauncherProfile;
 using ProjBobcat.Class.Model.YggdrasilAuth;
@@ -56,6 +57,7 @@ public class LaunchSettings
 
     public GameArguments? FallBackGameArguments { get; init; }
     public required GameArguments GameArguments { get; init; }
+    public StringDictionary? EnvironmentVariables { get; init; }
 
     public override string ToString()
     {
@@ -63,11 +65,11 @@ public class LaunchSettings
 
         sb
             .AppendLine()
-            .Append($"Game Name: {GameName}").AppendLine()
-            .Append($"Game Resource Path: {GameResourcePath}").AppendLine()
-            .Append($"Version: {Version}").AppendLine()
-            .Append($"Authenticator: {Authenticator?.GetType().Name ?? "-"}").AppendLine()
-            .Append($"Version Insulation: {VersionInsulation}").AppendLine()
+            .Append($"Game Name: {this.GameName}").AppendLine()
+            .Append($"Game Resource Path: {this.GameResourcePath}").AppendLine()
+            .Append($"Version: {this.Version}").AppendLine()
+            .Append($"Authenticator: {this.Authenticator?.GetType().Name ?? "-"}").AppendLine()
+            .Append($"Version Insulation: {this.VersionInsulation}").AppendLine()
             .AppendLine();
 
         return sb.ToString();

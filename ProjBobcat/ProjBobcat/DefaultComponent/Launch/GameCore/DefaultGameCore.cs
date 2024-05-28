@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Specialized;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -12,6 +13,7 @@ using ProjBobcat.Class.Model.YggdrasilAuth;
 using ProjBobcat.DefaultComponent.Authenticator;
 using ProjBobcat.Event;
 using ProjBobcat.Interface;
+using SharpCompress;
 using SharpCompress.Archives;
 using FileInfo = System.IO.FileInfo;
 
@@ -280,6 +282,9 @@ public sealed class DefaultGameCore : GameCoreBase
                 RedirectStandardError = false,
                 RedirectStandardOutput = false
             };
+            if (settings.EnvironmentVariables != null)
+                foreach (string key in settings.EnvironmentVariables.Keys)
+                    psi.EnvironmentVariables[key] = settings.EnvironmentVariables[key];
 
             #region log4j 缓解措施
 

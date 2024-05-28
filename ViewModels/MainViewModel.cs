@@ -1,19 +1,21 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
 using System.Reactive;
 using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 using System.Security.AccessControl;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Media.Imaging;
-using Avalonia.Threading;
 using mcswlib.ServerStatus;
 using NewRGB.Data;
 using NewRGB.Views;
+using ProjBobcat.Class.Helper;
 using ProjBobcat.Class.Model;
 using ProjBobcat.Class.Model.LauncherProfile;
 using ProjBobcat.Class.Model.Mojang;
@@ -44,6 +46,8 @@ public class MainViewModel : ViewModelBase
     private bool _needsJava;
     private bool _isPlayEnabled;
     private Bitmap? _profileAvatar;
+    private bool _visibleProgress = true;
+    private bool _isWayland;
 
     public MainViewModel()
     {
@@ -69,7 +73,7 @@ public class MainViewModel : ViewModelBase
         private set => this.RaiseAndSetIfChanged(ref _playText, value);
     }
 
-    public string ProgressText => $"{_progressValue:P1}";
+    public string ProgressText => _visibleProgress ? $"{_progressValue:P1}" : "";
     public int ProgressValue => (int)(_progressValue * 100);
 
     public string ProgressDesc
@@ -123,7 +127,7 @@ public class MainViewModel : ViewModelBase
                 return possibleJavaPath;
         }
 
-        var javaList = ProjBobcat.Class.Helper.SystemInfoHelper.FindJava();
+        var javaList = SystemInfoHelper.FindJava();
         var javaEnumerator = javaList.GetAsyncEnumerator();
         var valid = false;
         while (await javaEnumerator.MoveNextAsync())
@@ -265,6 +269,18 @@ public class MainViewModel : ViewModelBase
 
     private async Task Launch(string javaPath)
     {
+        var memory = (uint)(SystemInfoHelper.GetMemoryUsage()?.Total > 11000 ? 8192 : 4096);
+        var customGlfw = Path.Combine(DataManager.Instance.DataPath, "glfw.so");
+        var additionalJvmArguments = new List<string>();
+        if (_isWayland && File.Exists(customGlfw) && RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        {
+            additionalJvmArguments.Add($"-Dorg.lwjgl.glfw.libname={customGlfw}");
+            if (await IsNvidia())
+            {
+                Environment.SetEnvironmentVariable("__GL_THREADED_OPTIMIZATIONS", "0", EnvironmentVariableTarget.Process);
+            }
+        }
+
         var launchSettings = new LaunchSettings
         {
             Authenticator = new OfflineAuthenticator
@@ -282,16 +298,17 @@ public class MainViewModel : ViewModelBase
                         JavaExecutable = javaPath, //The path of Java executable
                         Resolution = new ResolutionModel // Game Window's Resolution
                         {
-                            Height = 500, // Height
-                            Width = 800 // Width
+                            Height = 480, // Height
+                            Width = 840 // Width
                         },
-                        MinMemory = 4096, // Minimal Memory
-                        MaxMemory = 4096 // Maximum Memory
+                        MinMemory = memory, // Minimal Memory
+                        MaxMemory = memory // Maximum Memory
                     },
             GameArguments = new GameArguments
             {
+                AdditionalJvmArguments = additionalJvmArguments,
                 JavaExecutable = javaPath,
-                MaxMemory = 4096,
+                MaxMemory = memory,
                 GcType = GcType.G1Gc
             },
             Version = "1.19.2-forge-43.3.13", // The version ID of the game to launch, such as 1.7.10 or 1.15.2
@@ -301,17 +318,6 @@ public class MainViewModel : ViewModelBase
                 "versions"), // Root path of the game (.minecraft/versions/)
             VersionLocator = DataManager.Instance.GameCoreBase?.VersionLocator! // Game's version locator
         };
-
-        // launchSettings.GameArguments =
-        //     new
-        //         GameArguments // (Optional) The arguments of specific game launch, the undefined settings here will be redirected to the fallback settings mentioned previously.
-        //         {
-        //             AdvanceArguments = specificArguments, // Advanced launch arguments
-        //             JavaExecutable = specificJavaExecutable, // JAVA's path
-        //             Resolution = specificResolution, // The window's size
-        //             MinMemory = specificMinMemory, // Minimum Memory
-        //             MaxMemory = specificMaxMemory // Maximum Memory
-        //         };
 
         var result = await DataManager.Instance.GameCoreBase?.LaunchTaskAsync(launchSettings)!;
         Console.WriteLine(result.GameProcess?.HasExited);
@@ -367,6 +373,53 @@ public class MainViewModel : ViewModelBase
         PlayText = "Play";
     }
 
+    private async Task CheckWaylandWorkaround()
+    {
+        UpdateProgress(0.0f, "Checking Wayland workaround", false);
+        var customGlfw = Path.Combine(DataManager.Instance.DataPath, "glfw.so");
+        if (File.Exists(customGlfw)) return;
+        UpdateProgress(0.0f, "Downloading GLFW");
+        var progress = await DownloadProgress.Download("https://files.enn3.ovh/libglfw-wayland.so", customGlfw);
+        if (progress == null)
+        {
+            UpdateProgress(1.0f, "Can't download GLFW");
+            await Task.Delay(1000);
+            return;
+        }
+
+        await DownloadAndProgress(progress, "GLFW");
+    }
+
+    [SupportedOSPlatform(nameof(OSPlatform.Linux))]
+    private static async Task<bool> IsWayland()
+    {
+        var process = Process.Start(new ProcessStartInfo("bash", [
+            "-c",
+            "loginctl show-session $(loginctl | grep $(whoami) | awk '{print $1}') -p Type"
+        ])
+        {
+            RedirectStandardOutput = true
+        });
+        if (process == null) return false;
+        await process.WaitForExitAsync();
+        return (await process.StandardOutput.ReadLineAsync())?.Split('=')[1] == "wayland";
+    }
+
+    [SupportedOSPlatform(nameof(OSPlatform.Linux))]
+    private static async Task<bool> IsNvidia()
+    {
+        var process = Process.Start(new ProcessStartInfo("bash", [
+            "-c",
+            "lspci | grep VGA | cut -d \":\" -f3"
+        ])
+        {
+            RedirectStandardOutput = true
+        });
+        if (process == null) return false;
+        await process.WaitForExitAsync();
+        return (await process.StandardOutput.ReadLineAsync())?.Contains("NVIDIA") ?? false;
+    }
+
     private async Task PlayButtonRun()
     {
         if (_gameProcess != null)
@@ -409,6 +462,7 @@ public class MainViewModel : ViewModelBase
 
             await CheckMinecraft();
             await CheckForge(javaPath);
+            if (_isWayland) await CheckWaylandWorkaround();
             UpdateProgress(1.0f, "Launching RGBcraft", false);
             await Launch(javaPath);
             await Task.Delay(25000);
@@ -501,6 +555,8 @@ public class MainViewModel : ViewModelBase
 
         await DownloadProfileAvatar();
 
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && await IsWayland()) _isWayland = true;
+
         var factory = new ServerStatusFactory();
         var inst = factory.Make("kamino.a-centauri.com", 25565, false, "One");
         var srv = await Task.Run(() => inst.Updater.Ping());
@@ -543,6 +599,7 @@ public class MainViewModel : ViewModelBase
     private void UpdateProgress(float value, string desc, bool determinateValue = true)
     {
         _progressValue = value;
+        _visibleProgress = determinateValue;
         this.RaisePropertyChanged(nameof(ProgressText));
         this.RaisePropertyChanged(nameof(ProgressValue));
         ProgressDesc = desc;
