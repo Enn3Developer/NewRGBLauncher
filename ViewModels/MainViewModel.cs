@@ -502,16 +502,9 @@ public class MainViewModel : ViewModelBase
         await DownloadProfileAvatar();
 
         var factory = new ServerStatusFactory();
-        factory.ServerChanged += (sender, _) =>
-        {
-            Dispatcher.UIThread.Invoke(() =>
-            {
-                var srv = (ServerStatus)sender!;
-                ServerInfo = $"{srv.PlayerCount}/{srv.MaxPlayerCount}";
-            });
-        };
-        factory.Make("kamino.a-centauri.com", 25565, false, "One");
-        factory.StartAutoUpdate();
+        var inst = factory.Make("kamino.a-centauri.com", 25565, false, "One");
+        var srv = await Task.Run(() => inst.Updater.Ping());
+        if (srv != null) ServerInfo = $"{srv.CurrentPlayerCount}/{srv.MaxPlayerCount}";
         try
         {
             _updateInfo = await _updateManager.CheckForUpdatesAsync();
