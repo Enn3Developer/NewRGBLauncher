@@ -474,7 +474,7 @@ public class MainViewModel : ViewModelBase
         httpClient.DefaultRequestHeaders.Add("User-Agent",
             "Mozilla/5.0 (X11; Linux x86_64; rv:126.0) Gecko/20100101 Firefox/126.0");
         var path = Path.Combine(DataManager.Instance.DataPath, "avatar.png");
-        var response = await httpClient.GetAsync($"http://skins.rgbcraft.com/api/helm/{Username}/1024");
+        var response = await httpClient.GetAsync($"http://skins.rgbcraft.com/api/helm/{Username}/48");
         response.EnsureSuccessStatusCode();
         await using (var stream = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.Read, 1024, true))
         {
@@ -489,7 +489,7 @@ public class MainViewModel : ViewModelBase
         }
     }
 
-    public async Task AsyncOnLoaded()
+    private async Task OnLoaded()
     {
         UpdateProgress(0.0f, "Checking for launcher updates", false);
         var profileAvatarPath = Path.Combine(DataManager.Instance.DataPath, "avatar.png");
@@ -512,7 +512,6 @@ public class MainViewModel : ViewModelBase
             {
                 UpdateProgress(1.0f, "Found launcher updates");
                 PlayText = "Update";
-                IsPlayEnabled = true;
                 return;
             }
         }
@@ -533,7 +532,11 @@ public class MainViewModel : ViewModelBase
         {
             UpdateProgress(1.0f, "Ready");
         }
+    }
 
+    public async Task AsyncOnLoaded()
+    {
+        await OnLoaded();
         IsPlayEnabled = true;
     }
 
