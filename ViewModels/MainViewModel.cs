@@ -12,6 +12,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Media.Imaging;
+using Avalonia.Platform;
 using mcswlib.ServerStatus;
 using NewRGB.Data;
 using NewRGB.Views;
@@ -46,8 +47,10 @@ public class MainViewModel : ViewModelBase
     private bool _needsJava;
     private bool _isPlayEnabled;
     private Bitmap? _profileAvatar;
+    private Bitmap? _background;
     private bool _visibleProgress = true;
     private bool _isWayland;
+    private Task? _launcherAssetsTask;
 
     public MainViewModel()
     {
@@ -88,6 +91,12 @@ public class MainViewModel : ViewModelBase
     {
         get => _determinateValue;
         private set => this.RaiseAndSetIfChanged(ref _determinateValue, !value);
+    }
+
+    public Bitmap? Background
+    {
+        get => _background;
+        private set => this.RaiseAndSetIfChanged(ref _background, value);
     }
 
     public string ServerInfo
@@ -276,9 +285,8 @@ public class MainViewModel : ViewModelBase
         {
             additionalJvmArguments.Add($"-Dorg.lwjgl.glfw.libname={customGlfw}");
             if (await IsNvidia())
-            {
-                Environment.SetEnvironmentVariable("__GL_THREADED_OPTIMIZATIONS", "0", EnvironmentVariableTarget.Process);
-            }
+                Environment.SetEnvironmentVariable("__GL_THREADED_OPTIMIZATIONS", "0",
+                    EnvironmentVariableTarget.Process);
         }
 
         var launchSettings = new LaunchSettings
@@ -422,6 +430,12 @@ public class MainViewModel : ViewModelBase
 
     private async Task PlayButtonRun()
     {
+        if (_launcherAssetsTask != null)
+        {
+            await _launcherAssetsTask;
+            _launcherAssetsTask = null;
+        }
+
         if (_gameProcess != null)
         {
             if (_gameProcess.HasExited) _gameProcess = null;
@@ -543,9 +557,38 @@ public class MainViewModel : ViewModelBase
         }
     }
 
+    private void CheckBackgrounds()
+    {
+        var backgrounds = Path.Combine(DataManager.Instance.DataPath, "backgrounds");
+        if (Directory.Exists(backgrounds) && Directory.GetFiles(backgrounds).Length > 0)
+        {
+            var rng = new Random();
+            var background = rng.Next(16);
+            var path = Path.Combine(backgrounds, $"{background}.png");
+            if (!File.Exists(path)) return;
+            Background = new Bitmap(path);
+            return;
+        }
+
+        Background = new Bitmap(AssetLoader.Open(new Uri("avares://NewRGB/Assets/0.png")));
+        if (!Directory.Exists(backgrounds)) Directory.CreateDirectory(backgrounds);
+        _launcherAssetsTask = Task.Run(async () =>
+        {
+            var httpClient = new HttpClient();
+            for (var i = 0; i < 16; i++)
+            {
+                var response = await httpClient.GetAsync($"https://newrgb.enn3.ovh/background/{i}");
+                response.EnsureSuccessStatusCode();
+                await using var stream = File.OpenWrite(Path.Combine(backgrounds, $"{i}.png"));
+                await response.Content.CopyToAsync(stream);
+            }
+        });
+    }
+
     private async Task OnLoaded()
     {
         UpdateProgress(0.0f, "Checking for launcher updates", false);
+        CheckBackgrounds();
         var profileAvatarPath = Path.Combine(DataManager.Instance.DataPath, "avatar.png");
         if (File.Exists(profileAvatarPath))
         {

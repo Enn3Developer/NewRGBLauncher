@@ -9,7 +9,7 @@
              Loaded="OnLoaded">
 
     <Panel>
-        <Image Source="/Assets/0.png" Stretch="Fill" />
+        <Image Source="{CompiledBinding Background}" Stretch="Fill" />
 
         <Panel Margin="20, 40, 20, 40">
             <Button VerticalAlignment="Top" Command="{CompiledBinding LogoCommand}">
@@ -30,12 +30,12 @@
                 <Image Source="/Assets/RGB.png" Width="60" />
             </Button>
 
-            <StackPanel HorizontalAlignment="Right">
+            <StackPanel HorizontalAlignment="Right" Spacing="10">
                 <StackPanel Orientation="Horizontal" Spacing="10">
                     <Label Content="{CompiledBinding Username}" VerticalAlignment="Center" FontSize="16" />
                     <Image Source="{CompiledBinding ProfileAvatar}" />
                 </StackPanel>
-                <StackPanel HorizontalAlignment="Right" IsVisible="False">
+                <StackPanel HorizontalAlignment="Right">
                     <Label>SUS</Label>
                     <Label>NewRGB</Label>
                 </StackPanel>
