@@ -430,12 +430,6 @@ public class MainViewModel : ViewModelBase
 
     private async Task PlayButtonRun()
     {
-        if (_launcherAssetsTask != null)
-        {
-            await _launcherAssetsTask;
-            _launcherAssetsTask = null;
-        }
-
         if (_gameProcess != null)
         {
             if (_gameProcess.HasExited) _gameProcess = null;
@@ -491,6 +485,12 @@ public class MainViewModel : ViewModelBase
     {
         IsPlayEnabled = false;
         await PlayButtonRun();
+        if (_launcherAssetsTask != null)
+        {
+            await _launcherAssetsTask;
+            _launcherAssetsTask = null;
+        }
+
         IsPlayEnabled = true;
     }
 

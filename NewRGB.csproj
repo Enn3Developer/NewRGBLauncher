@@ -35,6 +35,8 @@
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
+        <PackageReference Include="Projektanker.Icons.Avalonia" Version="9.3.0"/>
+        <PackageReference Include="Projektanker.Icons.Avalonia.FontAwesome" Version="9.3.0"/>
         <PackageReference Include="SharpCompress" Version="0.36.0"/>
         <PackageReference Include="System.Diagnostics.PerformanceCounter" Version="8.0.0"/>
         <PackageReference Include="System.Management" Version="8.0.0"/>

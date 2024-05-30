@@ -3,6 +3,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:NewRGB.ViewModels"
+             xmlns:i="https://github.com/projektanker/icons.avalonia"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="NewRGB.Views.MainView"
              x:DataType="vm:MainViewModel"
@@ -36,8 +37,8 @@
                     <Image Source="{CompiledBinding ProfileAvatar}" />
                 </StackPanel>
                 <StackPanel HorizontalAlignment="Right">
-                    <Label>SUS</Label>
-                    <Label>NewRGB</Label>
+                    <Button i:Attached.Icon="fa-gear" />
+                    <Button i:Attached.Icon="fa-globe" />
                 </StackPanel>
             </StackPanel>
 
