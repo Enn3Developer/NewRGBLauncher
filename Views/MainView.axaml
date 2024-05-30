@@ -13,21 +13,7 @@
         <Image Source="{CompiledBinding Background}" Stretch="Fill" />
 
         <Panel Margin="20, 40, 20, 40">
-            <Button VerticalAlignment="Top" Command="{CompiledBinding LogoCommand}">
-                <Button.Styles>
-                    <Style Selector="Button">
-                        <Setter Property="Margin" Value="9,3,9,3" />
-                        <Setter Property="BorderThickness" Value="0" />
-                        <Setter Property="Background" Value="Transparent" />
-                        <Setter Property="Padding" Value="6" />
-                    </Style>
-                    <Style Selector="Button /template/ ContentPresenter">
-                        <Setter Property="CornerRadius" Value="50" />
-                    </Style>
-                    <Style Selector="Button:pointerover /template/ ContentPresenter">
-                        <Setter Property="Background" Value="Transparent" />
-                    </Style>
-                </Button.Styles>
+            <Button VerticalAlignment="Top" Command="{CompiledBinding LogoCommand}" Classes="no-border">
                 <Image Source="/Assets/RGB.png" Width="60" />
             </Button>
 
@@ -37,8 +23,8 @@
                     <Image Source="{CompiledBinding ProfileAvatar}" />
                 </StackPanel>
                 <StackPanel HorizontalAlignment="Right">
-                    <Button i:Attached.Icon="fa-gear" />
-                    <Button i:Attached.Icon="fa-globe" />
+                    <Button i:Attached.Icon="fa-gear" Classes="no-border" />
+                    <Button i:Attached.Icon="fa-globe" Classes="no-border" />
                 </StackPanel>
             </StackPanel>
 
