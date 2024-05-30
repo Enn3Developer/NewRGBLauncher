@@ -121,7 +121,9 @@ public class MainViewModel : ViewModelBase
     {
         UpdateProgress(0.0f, "Checking Java version", false);
         var possibleJavaPath =
-            Path.Combine(DataManager.Instance.DataPath, "runtime", "jdk-21.0.3+9-jre", "bin", "java");
+            Path.Combine(DataManager.Instance.DataPath, "runtime", "jdk-21.0.3+9-jre", "bin");
+        possibleJavaPath = Path.Combine(possibleJavaPath,
+            RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "java.exe" : "java");
         if (File.Exists(possibleJavaPath))
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
