@@ -279,8 +279,8 @@ public sealed class DefaultGameCore : GameCoreBase
             {
                 UseShellExecute = false,
                 WorkingDirectory = rootPath,
-                RedirectStandardError = false,
-                RedirectStandardOutput = false
+                RedirectStandardError = true,
+                RedirectStandardOutput = true
             };
             if (settings.EnvironmentVariables != null)
                 foreach (string key in settings.EnvironmentVariables.Keys)

@@ -1,4 +1,7 @@
-﻿using System.Net;
+﻿using System;
+using System.IO;
+using System.Net;
+using System.Reflection;
 using NewRGB.Data;
 using ProjBobcat.Class.Model;
 using ProjBobcat.DefaultComponent.Authenticator;
@@ -16,6 +19,13 @@ public class MainWindowViewModel : ViewModelBase
         ServicePointManager.DefaultConnectionLimit = 512;
         DataManager.Instance.InitData(DataManager.Instance.DefaultLauncherAccountParser(),
             DataManager.Instance.DefaultLauncherProfileParser());
+        var filestream = new FileStream(DataManager.Instance.LogPath, FileMode.Create);
+        var streamWriter = new StreamWriter(filestream);
+        streamWriter.AutoFlush = true;
+        Console.SetOut(streamWriter);
+        Console.SetError(streamWriter);
+        Console.WriteLine(
+            $"Launched Launcher v{Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "NO_VERSION"}");
         if (!DataManager.Instance.HasAccount())
             _contentViewModel = new LoginViewModel();
         else

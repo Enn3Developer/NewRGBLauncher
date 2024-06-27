@@ -18,6 +18,10 @@ public class DataManager
     public string DataPath { get; } =
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "RGBcraft");
 
+    public string LogPath { get; } =
+        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "RGBcraft",
+            "launcher_log.txt");
+
     public string MinecraftPath { get; } =
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "RGBcraft",
             ".minecraft");

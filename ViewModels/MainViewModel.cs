@@ -9,6 +9,7 @@ using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using System.Security.AccessControl;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Media.Imaging;
@@ -330,13 +331,11 @@ public class MainViewModel : ViewModelBase
         };
 
         var result = await DataManager.Instance.GameCoreBase?.LaunchTaskAsync(launchSettings)!;
-        Console.WriteLine(result.GameProcess?.HasExited);
+        Console.WriteLine($"Has exited: {result.GameProcess?.HasExited}");
         _gameProcess = result.GameProcess;
-        if (result.Error == null) return;
-        Console.WriteLine(result.Error.Error);
-        Console.WriteLine(result.Error.ErrorMessage);
-        Console.WriteLine(result.Error.Exception);
-        Console.WriteLine(result.Error.Cause);
+        if (_gameProcess == null) return;
+        _gameProcess.ErrorDataReceived += (_, args) => { Console.Error.WriteLine(args.Data); };
+        _gameProcess.OutputDataReceived += (_, args) => { Console.WriteLine(args.Data); };
     }
 
     private async Task InstallJava()
