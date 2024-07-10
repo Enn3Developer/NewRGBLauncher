@@ -543,9 +543,9 @@ public class MainViewModel : ViewModelBase
             "Mozilla/5.0 (X11; Linux x86_64; rv:126.0) Gecko/20100101 Firefox/126.0");
         var path = Path.Combine(DataManager.Instance.DataPath, "avatar.png");
         var response = await httpClient.GetAsync($"http://skins.rgbcraft.com/api/helm/{username}/48");
-        if (!response.IsSuccessStatusCode)
+        if (!response.IsSuccessStatusCode || (await response.Content.ReadAsStringAsync()).Contains("404"))
         {
-            if (response.StatusCode == HttpStatusCode.NotFound && username != "SteveDoNotDelete")
+            if (username != "SteveDoNotDelete")
                 await DownloadProfileAvatar("SteveDoNotDelete");
             return;
         }
