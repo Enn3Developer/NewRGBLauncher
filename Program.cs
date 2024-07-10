@@ -24,6 +24,7 @@ internal sealed class Program
         catch (Exception e)
         {
             Console.Error.WriteLine(e);
+            throw;
         }
     }
 
