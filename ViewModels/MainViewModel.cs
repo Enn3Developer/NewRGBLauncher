@@ -619,7 +619,8 @@ public class MainViewModel : ViewModelBase
         }
 
         UpdateProgress(0.0f, "Checking for updates", false);
-        await _technic.Init();
+        if (!await _technic.Init()) UpdateProgress(1.0f, "Can't download info from technic");
+
         _needsUpdate = await _technic.CheckUpdate();
         if (_needsUpdate)
         {
