@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Net;
 using System.Net.Http;
 using System.Reactive;
 using System.Runtime.InteropServices;
@@ -535,14 +536,20 @@ public class MainViewModel : ViewModelBase
         UpdateProgress(1.0f, "Update installed");
     }
 
-    private async Task DownloadProfileAvatar()
+    private async Task DownloadProfileAvatar(string username)
     {
         var httpClient = new HttpClient();
         httpClient.DefaultRequestHeaders.Add("User-Agent",
             "Mozilla/5.0 (X11; Linux x86_64; rv:126.0) Gecko/20100101 Firefox/126.0");
         var path = Path.Combine(DataManager.Instance.DataPath, "avatar.png");
-        var response = await httpClient.GetAsync($"http://skins.rgbcraft.com/api/helm/{Username}/48");
-        response.EnsureSuccessStatusCode();
+        var response = await httpClient.GetAsync($"http://skins.rgbcraft.com/api/helm/{username}/48");
+        if (!response.IsSuccessStatusCode)
+        {
+            if (response.StatusCode == HttpStatusCode.NotFound && username != "SteveDoNotDelete")
+                await DownloadProfileAvatar("SteveDoNotDelete");
+            return;
+        }
+
         await using (var stream = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.Read, 1024, true))
         {
             await response.Content.CopyToAsync(stream);
@@ -559,7 +566,7 @@ public class MainViewModel : ViewModelBase
     private void CheckBackgrounds()
     {
         var backgrounds = Path.Combine(DataManager.Instance.DataPath, "backgrounds");
-        if (Directory.Exists(backgrounds) && Directory.GetFiles(backgrounds).Length > 0)
+        if (Directory.Exists(backgrounds) && Directory.GetFiles(backgrounds).Length == 16)
         {
             var rng = new Random();
             var background = rng.Next(16);
@@ -595,7 +602,7 @@ public class MainViewModel : ViewModelBase
             ProfileAvatar = Bitmap.DecodeToWidth(stream, 48);
         }
 
-        await DownloadProfileAvatar();
+        await DownloadProfileAvatar(Username);
 
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && await IsWayland()) _isWayland = true;
 
