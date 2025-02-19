@@ -31,6 +31,9 @@ using FileInfo = System.IO.FileInfo;
 
 namespace NewRGB.ViewModels;
 
+[SupportedOSPlatform(nameof(OSPlatform.Linux))]
+[SupportedOSPlatform(nameof(OSPlatform.OSX))]
+[SupportedOSPlatform(nameof(OSPlatform.Windows))]
 public class MainViewModel : ViewModelBase
 {
     private readonly Technic _technic = new("newrgb");
@@ -63,7 +66,7 @@ public class MainViewModel : ViewModelBase
         else
             Username = "SOMETHING_WENT_WRONG_3";
         _updateManager =
-            new UpdateManager(new GithubSource("https://github.com/rgbcraft/NewRGBLauncher/", null, false));
+            new UpdateManager(new GithubSource("https://github.com/Enn3Developer/NewRGBLauncher", null, false));
     }
 
     public ReactiveCommand<Unit, Unit> LogoCommand { get; }
