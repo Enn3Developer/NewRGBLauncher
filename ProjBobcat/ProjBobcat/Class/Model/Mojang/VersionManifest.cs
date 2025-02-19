@@ -1,12 +1,14 @@
 ﻿using System;
+using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Text.Json.Serialization.Metadata;
 
 namespace ProjBobcat.Class.Model.Mojang;
 
 public class Latest
 {
-    [JsonPropertyName("release")] public required string Release { get; init; }
-    [JsonPropertyName("snapshot")] public required string Snapshot { get; init; }
+    [JsonPropertyName("release")] public required string Release { get; init; } = "";
+    [JsonPropertyName("snapshot")] public required string Snapshot { get; init; } = "";
 }
 
 public class VersionManifestVersionsModel
@@ -20,12 +22,18 @@ public class VersionManifestVersionsModel
 
 public class VersionManifest
 {
-    [JsonPropertyName("latest")] public required Latest Latest { get; init; }
+    [JsonPropertyName("latest")] public required Latest Latest { get; set; }
 
     [JsonPropertyName("versions")] public VersionManifestVersionsModel[]? Versions { get; set; }
 }
 
 [JsonSerializable(typeof(VersionManifest))]
-public partial class VersionManifestContext : JsonSerializerContext
+public class VersionManifestContext(JsonSerializerOptions? options) : JsonSerializerContext(options)
 {
+    protected override JsonSerializerOptions? GeneratedSerializerOptions => options;
+
+    public override JsonTypeInfo? GetTypeInfo(Type type)
+    {
+        return JsonTypeInfo.CreateJsonTypeInfo(type, options);
+    }
 }

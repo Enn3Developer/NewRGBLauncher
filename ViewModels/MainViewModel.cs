@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Net;
 using System.Net.Http;
 using System.Reactive;
 using System.Runtime.InteropServices;
@@ -34,23 +33,23 @@ namespace NewRGB.ViewModels;
 
 public class MainViewModel : ViewModelBase
 {
-    private float _progressValue = 1.0f;
-    private string _progressDesc = "Ready";
-    private string _playText = "Play";
-    private bool _determinateValue = true;
     private readonly Technic _technic = new("newrgb");
-    private bool _needsUpdate;
-    private Process? _gameProcess;
     private readonly UpdateManager _updateManager;
-    private UpdateInfo? _updateInfo;
-    private string _serverInfo = "0/20";
-    private bool _needsJava;
-    private bool _isPlayEnabled;
-    private Bitmap? _profileAvatar;
     private Bitmap? _background;
-    private bool _visibleProgress = true;
+    private bool _determinateValue = true;
+    private Process? _gameProcess;
+    private bool _isPlayEnabled;
     private bool _isWayland;
     private Task? _launcherAssetsTask;
+    private bool _needsJava;
+    private bool _needsUpdate;
+    private string _playText = "Play";
+    private Bitmap? _profileAvatar;
+    private string _progressDesc = "Ready";
+    private float _progressValue = 1.0f;
+    private string _serverInfo = "0/20";
+    private UpdateInfo? _updateInfo;
+    private bool _visibleProgress = true;
 
     public MainViewModel()
     {
@@ -226,7 +225,7 @@ public class MainViewModel : ViewModelBase
         response.EnsureSuccessStatusCode();
         var responseJson = await response.Content.ReadAsStringAsync();
         var versionManifest =
-            JsonSerializer.Deserialize(responseJson, VersionManifestContext.Default.VersionManifest);
+            JsonSerializer.Deserialize<VersionManifest>(responseJson);
         var versionInfo = DataManager.Instance.GameCoreBase?.VersionLocator.GetGame(gameId);
         if (versionInfo == null)
         {
@@ -450,7 +449,7 @@ public class MainViewModel : ViewModelBase
         }
         else if (_needsUpdate)
         {
-            await DownloadUpdate();
+            if (!await DownloadUpdate()) return;
             await InstallUpdate();
             await _technic.SaveVersion();
             _needsUpdate = false;
@@ -494,17 +493,18 @@ public class MainViewModel : ViewModelBase
         IsPlayEnabled = true;
     }
 
-    private async Task DownloadUpdate()
+    private async Task<bool> DownloadUpdate()
     {
         UpdateProgress(0.0f, "Starting update", false);
         var progress = await _technic.DownloadUpdate();
         if (progress == null)
         {
             UpdateProgress(1.0f, "Failed to start update. Please retry");
-            return;
+            return false;
         }
 
         await DownloadAndProgress(progress, "update");
+        return true;
     }
 
     private async Task DownloadAndProgress(DownloadProgress progress, string desc)
@@ -584,7 +584,7 @@ public class MainViewModel : ViewModelBase
             for (var i = 0; i < 16; i++)
             {
                 var response = await httpClient.GetAsync($"https://newrgb.enn3.ovh/background/{i}");
-                response.EnsureSuccessStatusCode();
+                if (!response.IsSuccessStatusCode) return;
                 await using var stream = File.OpenWrite(Path.Combine(backgrounds, $"{i}.png"));
                 await response.Content.CopyToAsync(stream);
             }

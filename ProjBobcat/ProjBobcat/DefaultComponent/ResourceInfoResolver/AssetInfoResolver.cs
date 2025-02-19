@@ -43,7 +43,7 @@ public sealed class AssetInfoResolver : ResolverBase
             OnResolve("没有提供 Version Manifest， 开始下载");
 
             using var vmJsonRes = await HttpHelper.Get(DefaultVersionManifestUrl);
-            var vm = await vmJsonRes.Content.ReadFromJsonAsync(VersionManifestContext.Default.VersionManifest);
+            var vm = await vmJsonRes.Content.ReadFromJsonAsync(typeof(VersionManifest)) as VersionManifest;
 
             versions = vm?.Versions?.ToList();
         }
@@ -81,10 +81,9 @@ public sealed class AssetInfoResolver : ResolverBase
                 if (versionObject == default) yield break;
 
                 using var jsonRes = await HttpHelper.Get(versionObject.Url);
-                var versionModel =
-                    await jsonRes.Content.ReadFromJsonAsync(RawVersionModelContext.Default.RawVersionModel);
 
-                if (versionModel == default) yield break;
+                if (await jsonRes.Content.ReadFromJsonAsync(typeof(RawVersionModel)) is not RawVersionModel
+                    versionModel) yield break;
 
                 assetIndexDownloadUri = versionModel.AssetIndex?.Url;
             }
@@ -125,7 +124,7 @@ public sealed class AssetInfoResolver : ResolverBase
         {
             await using var assetFs = File.OpenRead(assetIndexesPath);
             assetObject =
-                await JsonSerializer.DeserializeAsync(assetFs, AssetObjectModelContext.Default.AssetObjectModel);
+                await JsonSerializer.DeserializeAsync<AssetObjectModel>(assetFs);
         }
         catch (Exception ex)
         {
@@ -135,7 +134,9 @@ public sealed class AssetInfoResolver : ResolverBase
             {
                 File.Delete(assetIndexesPath);
             }
-            catch (IOException) { }
+            catch (IOException)
+            {
+            }
 
             yield break;
         }
@@ -148,7 +149,9 @@ public sealed class AssetInfoResolver : ResolverBase
             {
                 File.Delete(assetIndexesPath);
             }
-            catch (IOException) { }
+            catch (IOException)
+            {
+            }
 
             yield break;
         }
@@ -173,7 +176,7 @@ public sealed class AssetInfoResolver : ResolverBase
             {
                 await using var fs = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
                 var computedHash = (await SHA1.HashDataAsync(fs)).BytesToString();
-                
+
                 if (computedHash.Equals(fi.Hash, StringComparison.OrdinalIgnoreCase)) continue;
             }
 
