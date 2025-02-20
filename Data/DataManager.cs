@@ -1,7 +1,10 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Text.Json;
+using System.Text.Json.Serialization.Metadata;
 using System.Threading.Tasks;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using ProjBobcat.Class.Model.LauncherProfile;
 using ProjBobcat.DefaultComponent.Launch;
 using ProjBobcat.DefaultComponent.Launch.GameCore;
@@ -26,11 +29,17 @@ public class DataManager
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "RGBcraft",
             ".minecraft");
 
+    public string ConfigPath { get; } =
+        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "RGBcraft",
+            "settings.json");
+
     public string ForgeInstallerPath { get; private set; } = "";
     public ILauncherAccountParser? LauncherAccountParser { get; private set; }
     public ILauncherProfileParser? LauncherProfileParser { get; private set; }
 
     public GameCoreBase? GameCoreBase { get; private set; }
+
+    public Settings Settings { get; private set; } = null!;
 
     public void InitData(ILauncherAccountParser launcherAccountParser, ILauncherProfileParser launcherProfileParser)
     {
@@ -55,6 +64,26 @@ public class DataManager
 
         ForgeInstallerPath = Path.Combine(DataPath, "forge_installer.jar");
         if (!Directory.Exists(DataPath)) Directory.CreateDirectory(DataPath);
+
+        if (File.Exists(ConfigPath))
+        {
+            var settings = JsonSerializer.Deserialize<Settings>(File.ReadAllText(ConfigPath));
+            if (settings != null)
+            {
+                Settings = settings;
+            }
+            else
+            {
+                Settings = new Settings();
+                File.WriteAllText(ConfigPath, JsonSerializer.Serialize(Settings));
+            }
+        }
+        else
+        {
+            Settings = new Settings();
+            File.WriteAllText(ConfigPath, JsonSerializer.Serialize(Settings));
+        }
+
         if (!Directory.Exists(MinecraftPath)) Directory.CreateDirectory(MinecraftPath);
         var versionsDir = Path.Combine(MinecraftPath, "versions");
         var forgeDir = Path.Combine(versionsDir, "1.19.2-forge-43.3.13");

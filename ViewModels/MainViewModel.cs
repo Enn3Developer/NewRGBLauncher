@@ -282,7 +282,6 @@ public class MainViewModel : ViewModelBase
 
     private async Task Launch(string javaPath)
     {
-        var memory = (uint)(SystemInfoHelper.GetMemoryUsage()?.Total > 11000 ? 8192 : 4096);
         var customGlfw = Path.Combine(DataManager.Instance.DataPath, "glfw.so");
         var additionalJvmArguments = new List<string>();
         if (_isWayland && File.Exists(customGlfw) && RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
@@ -313,14 +312,15 @@ public class MainViewModel : ViewModelBase
                             Height = 480, // Height
                             Width = 840 // Width
                         },
-                        MinMemory = memory, // Minimal Memory
-                        MaxMemory = memory // Maximum Memory
+                        MinMemory = DataManager.Instance.Settings.MinMemory, // Minimal Memory
+                        MaxMemory = DataManager.Instance.Settings.MaxMemory // Maximum Memory
                     },
             GameArguments = new GameArguments
             {
                 AdditionalJvmArguments = additionalJvmArguments,
                 JavaExecutable = javaPath,
-                MaxMemory = memory,
+                MinMemory = DataManager.Instance.Settings.MinMemory,
+                MaxMemory = DataManager.Instance.Settings.MaxMemory,
                 GcType = GcType.G1Gc
             },
             Version = "1.19.2-forge-43.3.13", // The version ID of the game to launch, such as 1.7.10 or 1.15.2
