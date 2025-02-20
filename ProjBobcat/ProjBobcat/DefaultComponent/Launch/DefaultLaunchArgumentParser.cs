@@ -97,12 +97,14 @@ public class DefaultLaunchArgumentParser : LaunchArgumentParserBase, IArgumentPa
                 }
                 else
                 {
-                    yield return "-Xmx2G";
+                    yield return $"-Xms{gameArgs.MinMemory}m";
+                    yield return $"-Xmx{gameArgs.MinMemory}m";
                 }
             }
             else
             {
-                yield return "-Xmx2G";
+                yield return $"-Xms{gameArgs.MinMemory}m";
+                yield return $"-Xmx{gameArgs.MinMemory}m";
             }
 
 
@@ -146,7 +148,7 @@ public class DefaultLaunchArgumentParser : LaunchArgumentParserBase, IArgumentPa
             { "${classpath}", $"\"{ClassPath}\"" },
             { "${classpath_separator}", Path.PathSeparator.ToString() },
             { "${library_directory}", $"\"{Path.Combine(RootPath, GamePathHelper.GetLibraryRootPath())}\"" },
-            { "${version_name}", versionName}
+            { "${version_name}", versionName }
         };
 
         #region log4j 缓解措施
@@ -164,58 +166,58 @@ public class DefaultLaunchArgumentParser : LaunchArgumentParserBase, IArgumentPa
             {
                 yield return StringHelper.ReplaceByDic(jvmArg, jvmArgumentsDic);
             }
-                
+
             yield break;
         }
 
         const string preset = """
-            [
-                {
-                    "rules": [
-                        {
-                            "action": "allow",
-                            "os": {
-                                "name": "osx"
-                            }
-                        }
-                    ],
-                    "value": [
-                        "-XstartOnFirstThread"
-                    ]
-                },
-                {
-                    "rules": [
-                        {
-                            "action": "allow",
-                            "os": {
-                                "name": "windows"
-                            }
-                        }
-                    ],
-                    "value": "-XX:HeapDumpPath=MojangTricksIntelDriversForPerformance_javaw.exe_minecraft.exe.heapdump"
-                },
-                {
-                    "rules": [
-                        {
-                            "action": "allow",
-                            "os": {
-                                "name": "windows",
-                                "version": "^10\\\\."
-                            }
-                        }
-                    ],
-                    "value": [
-                        "-Dos.name=Windows 10",
-                        "-Dos.version=10.0"
-                    ]
-                },
-                "-Djava.library.path=${natives_directory}",
-                "-Dminecraft.launcher.brand=${launcher_name}",
-                "-Dminecraft.launcher.version=${launcher_version}",
-                "-cp",
-                "${classpath}"
-            ]
-            """;
+                              [
+                                  {
+                                      "rules": [
+                                          {
+                                              "action": "allow",
+                                              "os": {
+                                                  "name": "osx"
+                                              }
+                                          }
+                                      ],
+                                      "value": [
+                                          "-XstartOnFirstThread"
+                                      ]
+                                  },
+                                  {
+                                      "rules": [
+                                          {
+                                              "action": "allow",
+                                              "os": {
+                                                  "name": "windows"
+                                              }
+                                          }
+                                      ],
+                                      "value": "-XX:HeapDumpPath=MojangTricksIntelDriversForPerformance_javaw.exe_minecraft.exe.heapdump"
+                                  },
+                                  {
+                                      "rules": [
+                                          {
+                                              "action": "allow",
+                                              "os": {
+                                                  "name": "windows",
+                                                  "version": "^10\\\\."
+                                              }
+                                          }
+                                      ],
+                                      "value": [
+                                          "-Dos.name=Windows 10",
+                                          "-Dos.version=10.0"
+                                      ]
+                                  },
+                                  "-Djava.library.path=${natives_directory}",
+                                  "-Dminecraft.launcher.brand=${launcher_name}",
+                                  "-Dminecraft.launcher.version=${launcher_version}",
+                                  "-cp",
+                                  "${classpath}"
+                              ]
+                              """;
 
         var preJvmArguments =
             VersionLocator.ParseJvmArguments(JsonSerializer.Deserialize(preset,
@@ -232,7 +234,7 @@ public class DefaultLaunchArgumentParser : LaunchArgumentParserBase, IArgumentPa
             authResult.SelectedProfile == null ||
             string.IsNullOrEmpty(authResult.AccessToken))
             throw new ArgumentNullException("无效的用户凭据，请检查登陆状态");
-        
+
         var gameDir = _launchSettings.VersionInsulation
             ? Path.Combine(RootPath, GamePathHelper.GetGamePath(LaunchSettings.Version))
             : RootPath;
