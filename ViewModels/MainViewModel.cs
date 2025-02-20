@@ -292,6 +292,8 @@ public class MainViewModel : ViewModelBase
                     EnvironmentVariableTarget.Process);
         }
 
+        Console.WriteLine(
+            $"MainViewModel: {DataManager.Instance.Settings.MinMemory}; {DataManager.Instance.Settings.MaxMemory}");
         var launchSettings = new LaunchSettings
         {
             Authenticator = new OfflineAuthenticator

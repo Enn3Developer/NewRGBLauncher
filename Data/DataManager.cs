@@ -74,15 +74,25 @@ public class DataManager
             }
             else
             {
-                Settings = new Settings();
+                Settings = new Settings
+                {
+                    MinMemory = 4096,
+                    MaxMemory = 4096
+                };
                 File.WriteAllText(ConfigPath, JsonSerializer.Serialize(Settings));
             }
         }
         else
         {
-            Settings = new Settings();
+            Settings = new Settings
+            {
+                MinMemory = 4096,
+                MaxMemory = 4096
+            };
             File.WriteAllText(ConfigPath, JsonSerializer.Serialize(Settings));
         }
+
+        Console.WriteLine($"{Settings.MinMemory}; {Settings.MaxMemory}");
 
         if (!Directory.Exists(MinecraftPath)) Directory.CreateDirectory(MinecraftPath);
         var versionsDir = Path.Combine(MinecraftPath, "versions");

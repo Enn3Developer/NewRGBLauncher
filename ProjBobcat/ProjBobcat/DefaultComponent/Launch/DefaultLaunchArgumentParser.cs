@@ -90,7 +90,7 @@ public class DefaultLaunchArgumentParser : LaunchArgumentParserBase, IArgumentPa
         {
             if (gameArgs.MaxMemory > 0)
             {
-                if (gameArgs.MinMemory < gameArgs.MaxMemory)
+                if (gameArgs.MinMemory <= gameArgs.MaxMemory)
                 {
                     yield return $"-Xms{gameArgs.MinMemory}m";
                     yield return $"-Xmx{gameArgs.MaxMemory}m";
