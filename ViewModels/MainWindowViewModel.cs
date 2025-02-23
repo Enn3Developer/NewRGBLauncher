@@ -54,4 +54,9 @@ public class MainWindowViewModel : ViewModelBase
             .Find(result.SelectedProfile.UUID.ToGuid())?.Key ?? "");
         ContentViewModel = new MainViewModel();
     }
+
+    public void OpenSettings()
+    {
+        ContentViewModel = new SettingsViewModel();
+    }
 }

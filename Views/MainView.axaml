@@ -23,7 +23,7 @@
                     <Image Source="{CompiledBinding ProfileAvatar}" />
                 </StackPanel>
                 <StackPanel HorizontalAlignment="Right">
-                    <Button i:Attached.Icon="fa-gear" Classes="no-border" ToolTip.Tip="Not yet implemented" />
+                    <Button i:Attached.Icon="fa-gear" Classes="no-border" ToolTip.Tip="Settings" Click="OnSettings" />
                     <Button i:Attached.Icon="fa-globe" Classes="no-border" Command="{CompiledBinding LogoCommand}" />
                 </StackPanel>
             </StackPanel>

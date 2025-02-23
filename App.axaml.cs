@@ -13,6 +13,7 @@ public partial class App : Application
         AvaloniaXamlLoader.Load(this);
         ViewLocator.Register<LoginViewModel, LoginView>();
         ViewLocator.Register<MainViewModel, MainView>();
+        ViewLocator.Register<SettingsViewModel, SettingsView>();
     }
 
     public override void OnFrameworkInitializationCompleted()

@@ -1,0 +1,25 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="NewRGB.Views.SettingsView">
+    <Panel>
+        <Image Source="/Assets/0.png" Stretch="Fill" />
+        <Panel HorizontalAlignment="Center" VerticalAlignment="Center">
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="10" Margin="20">
+                <Label>RAM</Label>
+                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="10" Margin="20"
+                            Orientation="Horizontal">
+                    <Label>Min</Label>
+                    <Slider Minimum="2048" Maximum="8192" TickFrequency="512" IsSnapToTickEnabled="True"></Slider>
+                </StackPanel>
+                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="10" Margin="20"
+                            Orientation="Horizontal">
+                    <Label>Max</Label>
+                    <Slider Minimum="2048" Maximum="8192" TickFrequency="512" IsSnapToTickEnabled="True"></Slider>
+                </StackPanel>
+            </StackPanel>
+        </Panel>
+    </Panel>
+</UserControl>

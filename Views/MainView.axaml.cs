@@ -15,4 +15,9 @@ public partial class MainView : UserControl
     {
         if (DataContext is MainViewModel viewModel) await viewModel.AsyncOnLoaded();
     }
+
+    private void OnSettings(object? sender, RoutedEventArgs e)
+    {
+        if (MainWindowViewModel.Instance != null) MainWindowViewModel.Instance.OpenSettings();
+    }
 }
