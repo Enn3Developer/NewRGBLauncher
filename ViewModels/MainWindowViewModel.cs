@@ -17,6 +17,9 @@ public class MainWindowViewModel : ViewModelBase
 {
     private ViewModelBase _contentViewModel;
 
+    private static readonly string Version =
+        Assembly.GetExecutingAssembly().GetName().Version?.ToString()[..^2] ?? "NO_VERSION";
+
     public MainWindowViewModel()
     {
         Instance = this;
@@ -28,7 +31,7 @@ public class MainWindowViewModel : ViewModelBase
         Console.SetOut(streamWriter);
         Console.SetError(streamWriter);
         Console.WriteLine(
-            $"Launched Launcher v{Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "NO_VERSION"}");
+            $"Launched Launcher v{Version}");
         if (!DataManager.Instance.HasAccount())
             _contentViewModel = new LoginViewModel();
         else
@@ -42,6 +45,8 @@ public class MainWindowViewModel : ViewModelBase
         get => _contentViewModel;
         private set => this.RaiseAndSetIfChanged(ref _contentViewModel, value);
     }
+
+    public string Title => $"NewRGB v{Version}";
 
     public void OfflineAuth(string name)
     {
