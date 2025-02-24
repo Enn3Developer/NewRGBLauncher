@@ -2,9 +2,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Text.Json;
-using System.Text.Json.Serialization.Metadata;
 using System.Threading.Tasks;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using ProjBobcat.Class.Model.LauncherProfile;
 using ProjBobcat.DefaultComponent.Launch;
 using ProjBobcat.DefaultComponent.Launch.GameCore;
@@ -67,29 +65,13 @@ public class DataManager
 
         if (File.Exists(ConfigPath))
         {
-            var settings = JsonSerializer.Deserialize<Settings>(File.ReadAllText(ConfigPath));
-            if (settings != null)
-            {
-                Settings = settings;
-            }
-            else
-            {
-                Settings = new Settings
-                {
-                    MinMemory = 4096,
-                    MaxMemory = 4096
-                };
-                File.WriteAllText(ConfigPath, JsonSerializer.Serialize(Settings));
-            }
+            Settings = JsonSerializer.Deserialize<Settings>(File.ReadAllText(ConfigPath)) ?? Settings.Default();
+            SaveSettings();
         }
         else
         {
-            Settings = new Settings
-            {
-                MinMemory = 4096,
-                MaxMemory = 4096
-            };
-            File.WriteAllText(ConfigPath, JsonSerializer.Serialize(Settings));
+            Settings = Settings.Default();
+            SaveSettings();
         }
 
         Console.WriteLine($"{Settings.MinMemory}; {Settings.MaxMemory}");
@@ -111,6 +93,11 @@ public class DataManager
             },
             GameLogResolver = new DefaultGameLogResolver()
         };
+    }
+
+    public void SaveSettings()
+    {
+        File.WriteAllText(ConfigPath, JsonSerializer.Serialize(Settings));
     }
 
     public bool IsForgeInstalled()

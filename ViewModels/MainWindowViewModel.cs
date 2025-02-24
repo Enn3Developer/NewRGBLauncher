@@ -55,6 +55,11 @@ public class MainWindowViewModel : ViewModelBase
         if (result.AuthStatus is AuthStatus.Failed or AuthStatus.Unknown || result.SelectedProfile == null) return;
         DataManager.Instance.LauncherAccountParser.ActivateAccount(DataManager.Instance.LauncherAccountParser
             .Find(result.SelectedProfile.UUID.ToGuid())?.Key ?? "");
+        OpenMainViewModel();
+    }
+
+    public void OpenMainViewModel()
+    {
         ContentViewModel = new MainViewModel();
     }
 

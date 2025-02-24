@@ -2,8 +2,10 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:NewRGB.ViewModels"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="NewRGB.Views.SettingsView">
+             x:Class="NewRGB.Views.SettingsView"
+             x:DataType="vm:SettingsViewModel">
     <Panel>
         <Image Source="/Assets/0.png" Stretch="Fill" />
         <Panel HorizontalAlignment="Center" VerticalAlignment="Center">
@@ -11,14 +13,26 @@
                 <Label>RAM</Label>
                 <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="10" Margin="20"
                             Orientation="Horizontal">
-                    <Label>Min</Label>
-                    <Slider Minimum="2048" Maximum="8192" TickFrequency="512" IsSnapToTickEnabled="True"></Slider>
+                    <Label>Min: </Label>
+                    <TextBlock Text="{CompiledBinding MinMemory}"></TextBlock>
                 </StackPanel>
+                <Slider Minimum="{CompiledBinding MinMemoryValue}" Maximum="{CompiledBinding MaxMemoryValue}"
+                        TickFrequency="512" IsSnapToTickEnabled="True" Width="300"
+                        Value="{CompiledBinding MinMemory}" Name="MinMemorySlider">
+                </Slider>
                 <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="10" Margin="20"
                             Orientation="Horizontal">
-                    <Label>Max</Label>
-                    <Slider Minimum="2048" Maximum="8192" TickFrequency="512" IsSnapToTickEnabled="True"></Slider>
+                    <Label>Max: </Label>
+                    <TextBlock Text="{CompiledBinding MaxMemory}"></TextBlock>
                 </StackPanel>
+                <Slider Minimum="{CompiledBinding MinMemoryValue}" Maximum="{CompiledBinding MaxMemoryValue}"
+                        TickFrequency="512"
+                        IsSnapToTickEnabled="True" Width="300"
+                        Value="{CompiledBinding MaxMemory}" Name="MaxMemorySlider">
+                </Slider>
+                <Panel HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <Button Click="OnDone">Done</Button>
+                </Panel>
             </StackPanel>
         </Panel>
     </Panel>
