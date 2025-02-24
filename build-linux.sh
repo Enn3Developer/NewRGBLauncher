@@ -24,7 +24,7 @@ vpk download github --repoUrl "https://github.com/Enn3Developer/NewRGBLauncher"
 
 echo ""
 echo "Building Velopack Release v$BUILD_VERSION"
-vpk pack -u NewRGB -v "$BUILD_VERSION" -o "$RELEASE_DIR" -p "$PUBLISH_DIR"
+vpk pack -u NewRGB -v "$BUILD_VERSION" -o "$RELEASE_DIR" -p "$PUBLISH_DIR" --releaseNotes release_notes.md
 
 echo ""
 echo "Uploading..."
