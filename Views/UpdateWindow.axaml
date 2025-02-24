@@ -9,6 +9,7 @@
         x:DataType="vm:UpdateWindowViewModel"
         Title="Release notes">
     <Panel>
+        <Image Source="/Assets/0.png" Stretch="Fill" />
         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Orientation="Vertical">
             <md:MarkdownScrollViewer Markdown="{CompiledBinding Markdown}"></md:MarkdownScrollViewer>
             <StackPanel HorizontalAlignment="Right" VerticalAlignment="Center" Orientation="Horizontal">
