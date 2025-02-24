@@ -1,3 +1,5 @@
+using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
@@ -6,6 +8,9 @@ using NewRGB.Views;
 
 namespace NewRGB;
 
+[SupportedOSPlatform(nameof(OSPlatform.Linux))]
+[SupportedOSPlatform(nameof(OSPlatform.OSX))]
+[SupportedOSPlatform(nameof(OSPlatform.Windows))]
 public partial class App : Application
 {
     public override void Initialize()

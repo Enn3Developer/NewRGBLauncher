@@ -1,9 +1,14 @@
+using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using NewRGB.ViewModels;
 
 namespace NewRGB.Views;
 
+[SupportedOSPlatform(nameof(OSPlatform.Linux))]
+[SupportedOSPlatform(nameof(OSPlatform.OSX))]
+[SupportedOSPlatform(nameof(OSPlatform.Windows))]
 public partial class MainView : UserControl
 {
     public MainView()

@@ -1,12 +1,17 @@
 ﻿using Avalonia;
 using Avalonia.ReactiveUI;
 using System;
+using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 using Projektanker.Icons.Avalonia;
 using Projektanker.Icons.Avalonia.FontAwesome;
 using Velopack;
 
 namespace NewRGB;
 
+[SupportedOSPlatform(nameof(OSPlatform.Linux))]
+[SupportedOSPlatform(nameof(OSPlatform.OSX))]
+[SupportedOSPlatform(nameof(OSPlatform.Windows))]
 internal sealed class Program
 {
     // Initialization code. Don't use any Avalonia, third-party APIs or any

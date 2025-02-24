@@ -1,7 +1,8 @@
 ﻿using System;
 using System.IO;
-using System.Net;
 using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 using NewRGB.Data;
 using ProjBobcat.Class.Model;
 using ProjBobcat.DefaultComponent.Authenticator;
@@ -9,6 +10,9 @@ using ReactiveUI;
 
 namespace NewRGB.ViewModels;
 
+[SupportedOSPlatform(nameof(OSPlatform.Linux))]
+[SupportedOSPlatform(nameof(OSPlatform.OSX))]
+[SupportedOSPlatform(nameof(OSPlatform.Windows))]
 public class MainWindowViewModel : ViewModelBase
 {
     private ViewModelBase _contentViewModel;
@@ -16,7 +20,6 @@ public class MainWindowViewModel : ViewModelBase
     public MainWindowViewModel()
     {
         Instance = this;
-        ServicePointManager.DefaultConnectionLimit = 512;
         DataManager.Instance.InitData(DataManager.Instance.DefaultLauncherAccountParser(),
             DataManager.Instance.DefaultLauncherProfileParser());
         var filestream = new FileStream(DataManager.Instance.LogPath, FileMode.Create);
