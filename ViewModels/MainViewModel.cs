@@ -619,7 +619,7 @@ public class MainViewModel : ViewModelBase
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && await IsWayland()) _isWayland = true;
 
         var factory = new ServerStatusFactory();
-        var inst = factory.Make("kamino.a-centauri.com", 25565, false, "One");
+        var inst = factory.Make("kamino.a-centauri.com", 25567, false, "One");
         var srv = await Task.Run(() => inst.Updater.Ping());
         if (srv != null) ServerInfo = $"{srv.CurrentPlayerCount}/{srv.MaxPlayerCount}";
         try

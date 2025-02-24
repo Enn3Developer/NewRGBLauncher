@@ -1,4 +1,5 @@
-# v0.5.0
-### New features
-- Settings page
-- Release notes window
+# v0.5.1
+
+### Fixes
+
+- Showing online players on server
