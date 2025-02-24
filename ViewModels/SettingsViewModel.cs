@@ -8,8 +8,8 @@ public class SettingsViewModel : ViewModelBase
     private uint _minMemory = DataManager.Instance.Settings.MinMemory;
     private uint _maxMemory = DataManager.Instance.Settings.MaxMemory;
 
-    public uint MaxMemoryValue { get; } = DataManager.Instance.Settings.MaxMemoryValue;
-    public static uint MinMemoryValue => Settings.MinMemoryValue;
+    public uint MaxMemoryValue => Settings.MaxMemoryValue;
+    public uint MinMemoryValue => Settings.MinMemoryValue;
 
     public uint MinMemory
     {

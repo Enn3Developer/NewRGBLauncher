@@ -9,7 +9,7 @@ namespace NewRGB.Data;
 public class Settings
 {
     [System.Text.Json.Serialization.JsonIgnore]
-    public readonly uint MaxMemoryValue =
+    public static readonly uint MaxMemoryValue =
         (uint)RoundToTwoPower(SystemInfoHelper.GetMemoryUsage()?
             .Total / 2.0 ?? 8192.0);
 
@@ -36,8 +36,8 @@ public class Settings
     {
         return new Settings
         {
-            MinMemory = 4096,
-            MaxMemory = 4096
+            MinMemory = MaxMemoryValue >= 8192 ? 8192u : 4096,
+            MaxMemory = MaxMemoryValue >= 8192 ? 8192u : 4096,
         };
     }
 }
