@@ -443,6 +443,13 @@ public class MainViewModel : ViewModelBase
         if (_updateInfo != null)
         {
             UpdateProgress(0.0f, "Updating launcher");
+            var updateWindow = new UpdateWindow(_updateInfo.TargetFullRelease.NotesMarkdown)
+            {
+                DataContext = new UpdateWindowViewModel()
+            };
+            var result = await updateWindow.ShowDialog<bool?>(MainWindow.Instance!);
+            // don't update if user cancelled update
+            if (result == null || !result.Value) return;
             await _updateManager.DownloadUpdatesAsync(_updateInfo,
                 i => UpdateProgress((float)i / 100, "Updating launcher"));
             UpdateProgress(1.0f, "Restarting launcher", false);
