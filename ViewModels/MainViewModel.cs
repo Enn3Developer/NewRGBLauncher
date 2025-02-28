@@ -443,9 +443,12 @@ public class MainViewModel : ViewModelBase
         if (_updateInfo != null)
         {
             UpdateProgress(0.0f, "Updating launcher");
-            var updateWindow = new UpdateWindow(_updateInfo.TargetFullRelease.NotesMarkdown)
+            var updateWindow = new UpdateWindow
             {
-                DataContext = new UpdateWindowViewModel()
+                DataContext = new UpdateWindowViewModel
+                {
+                    Markdown = _updateInfo.TargetFullRelease.NotesMarkdown
+                }
             };
             var result = await updateWindow.ShowDialog<bool?>(MainWindow.Instance!);
             // don't update if user cancelled update

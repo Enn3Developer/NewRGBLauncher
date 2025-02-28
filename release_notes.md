@@ -1,5 +1,5 @@
-# v0.5.2
+# v0.5.3
 
 ### Fixes
 
-- Fixed a bug reported by gimmy
+- Fixed update notes not displaying

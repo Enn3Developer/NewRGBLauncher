@@ -6,10 +6,9 @@ namespace NewRGB.Views;
 
 public partial class UpdateWindow : Window
 {
-    public UpdateWindow(string notes)
+    public UpdateWindow()
     {
         InitializeComponent();
-        if (DataContext is UpdateWindowViewModel updateWindowViewModel) updateWindowViewModel.Markdown = notes;
     }
 
     private void OnCancel(object? sender, RoutedEventArgs e)

@@ -4,18 +4,24 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:md="https://github.com/whistyun/Markdown.Avalonia"
         xmlns:vm="clr-namespace:NewRGB.ViewModels"
-        mc:Ignorable="d" d:DesignWidth="300" d:DesignHeight="170"
+        mc:Ignorable="d" d:DesignWidth="550" d:DesignHeight="300"
         x:Class="NewRGB.Views.UpdateWindow"
         x:DataType="vm:UpdateWindowViewModel"
-        Title="Release notes">
+        Title="Release notes"
+        Width="550"
+        Height="300">
     <Panel>
-        <Image Source="/Assets/0.png" Stretch="Fill" />
-        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Orientation="Vertical">
-            <md:MarkdownScrollViewer Markdown="{CompiledBinding Markdown}"></md:MarkdownScrollViewer>
-            <StackPanel HorizontalAlignment="Right" VerticalAlignment="Center" Orientation="Horizontal">
-                <Button Click="OnCancel">Cancel</Button>
-                <Button Click="OnUpdate">Update</Button>
+        <!-- <Image Source="/Assets/0.png" Stretch="Fill" /> -->
+        <Panel HorizontalAlignment="Center" VerticalAlignment="Center" MinWidth="550" MinHeight="300">
+            <Rectangle Fill="DarkKhaki" Opacity="100" />
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Orientation="Vertical" Margin="10"
+                        Spacing="20">
+                <md:MarkdownScrollViewer Markdown="{CompiledBinding Markdown}"></md:MarkdownScrollViewer>
+                <StackPanel HorizontalAlignment="Right" VerticalAlignment="Center" Orientation="Horizontal">
+                    <Button Click="OnCancel">Cancel</Button>
+                    <Button Click="OnUpdate">Update</Button>
+                </StackPanel>
             </StackPanel>
-        </StackPanel>
+        </Panel>
     </Panel>
 </Window>
