@@ -367,7 +367,7 @@ public static class DownloadHelper
 
                     await using var stream = await res.Content.ReadAsStreamAsync(cts.Token);
                     await using var fileToWriteTo = File.Create(t.Item2.TempFileName);
-                    
+
                     var sw = new Stopwatch();
                     var lastWrotePos = 0L;
 

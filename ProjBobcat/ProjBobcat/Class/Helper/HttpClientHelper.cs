@@ -38,7 +38,8 @@ public static class HttpClientHelper
         {
             PooledConnectionLifetime = TimeSpan.FromMinutes(10),
             AllowAutoRedirect = false,
-            Proxy = HttpClient.DefaultProxy
+            Proxy = HttpClient.DefaultProxy,
+            MaxConnectionsPerServer = 1024
         }));
         var httpClient = new HttpClient(handlers);
 

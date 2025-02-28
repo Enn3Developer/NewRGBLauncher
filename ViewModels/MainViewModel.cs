@@ -238,7 +238,7 @@ public class MainViewModel : ViewModelBase
 
         var completer = new DefaultResourceCompleter
         {
-            MaxDegreeOfParallelism = Environment.ProcessorCount * 2,
+            MaxDegreeOfParallelism = Environment.ProcessorCount,
             ResourceInfoResolvers = new List<IResourceInfoResolver>
             {
                 new AssetInfoResolver

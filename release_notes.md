@@ -1,10 +1,5 @@
-# v0.5.1
-
-### New Features
-
-- Added version to window title bar
+# v0.5.2
 
 ### Fixes
 
-- Showing online players on server
-- Fixed text invisible on release note window
+- Fixed a bug reported by gimmy
