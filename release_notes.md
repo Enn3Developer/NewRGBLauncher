@@ -1,5 +1,5 @@
-# v0.5.3
+# v0.5.4
 
 ### Fixes
 
-- Fixed update notes not displaying
+- Using correct headers for downloading updates from Technic

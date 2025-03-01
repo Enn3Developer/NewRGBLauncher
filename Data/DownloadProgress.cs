@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
 
 namespace NewRGB.Data;
@@ -9,11 +10,20 @@ public class DownloadProgress(byte[] buffer, FileStream fileStream, long length,
 {
     private const int BufferSize = 4096;
 
+    private static readonly Lazy<HttpClient> HttpClient = new(() =>
+    {
+        var httpClient = new HttpClient();
+
+        httpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("Mozilla/5.0 (RGBCraft Launcher)"));
+
+        return httpClient;
+    });
+
     public long Length { get; } = length;
 
     public static async Task<DownloadProgress?> Download(string url, string path, HttpClient? httpClient = null)
     {
-        httpClient ??= new HttpClient();
+        httpClient ??= HttpClient.Value;
         var fileStream = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.Read, BufferSize, true);
         try
         {
