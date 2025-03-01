@@ -14,7 +14,7 @@ public class DownloadProgress(byte[] buffer, FileStream fileStream, long length,
     {
         var httpClient = new HttpClient();
 
-        httpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("Mozilla/5.0 (RGBCraft Launcher)"));
+        httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (RGBCraft Launcher)");
 
         return httpClient;
     });

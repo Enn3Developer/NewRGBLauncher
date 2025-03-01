@@ -1,5 +1,5 @@
-# v0.5.4
+# v0.5.5
 
 ### Fixes
 
-- Using correct headers for downloading updates from Technic
+- Hotfix
