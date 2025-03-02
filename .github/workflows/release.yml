@@ -22,7 +22,7 @@ jobs:
         run: |
           dotnet publish -c Release --self-contained -r win-x64 -o publish
           vpk download github --repoUrl https://github.com/Enn3Developer/NewRGBLauncher
-          vpk pack -u NewRGB -o releases -p publish -f net8-x64-desktop -v ${{github.ref_name}} --releaseNotes release_notes.md --packTitle "NewRGBLauncher" --icon "Assets/RGB.png"
+          vpk pack -u NewRGB -o releases -p publish -f net8-x64-desktop -v ${{github.ref_name}} --releaseNotes release_notes.md --packTitle NewRGBLauncher --icon Assets/RGB.ico
           vpk upload github --repoUrl "https://github.com/Enn3Developer/NewRGBLauncher" --merge --releaseName v${{github.ref_name}} --tag ${{github.ref_name}} --token ${{ secrets.GITHUB_TOKEN }} -o releases
   build-linux:
     runs-on: ubuntu-latest
@@ -36,7 +36,7 @@ jobs:
       - name: Setup Velopack
         run: |
           sudo add-apt-repository universe
-          sudo apt install libfuse2 squashfs
+          sudo apt install libfuse2 squashfs-tools
           dotnet tool update -g vpk
       - name: Build
         run: |
