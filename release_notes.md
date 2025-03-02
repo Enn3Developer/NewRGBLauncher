@@ -1,5 +1,5 @@
-# v0.5.5
+# v0.5.6
 
 ### Fixes
 
-- Hotfix
+- Icon not showing when installed on windows
